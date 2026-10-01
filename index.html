@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Thi Trực Tuyến - Ghibli Ponyo Ocean Theme</title>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Bảng màu Ghibli x Ponyo (Biển xanh, San hô cam, Bọt biển trắng, Nắng vàng) */
+            --primary: #1e88a8; /* Ocean teal */
+            --primary-dark: #0d4f66; /* Deep sea blue */
+            --primary-light: #d7f3fa; /* Sea foam */
+            --accent: #ff7a5c; /* Ponyo coral/orange dress */
+            --accent-dark: #e8562f;
+
+            --sidebar-bg: rgba(217, 244, 250, 0.85); /* Bọt biển kính mờ */
+            --sidebar-hover: #bfeaf5;
+
+            /* Ghibli Ponyo gradient: bầu trời hoàng hôn chạm mặt biển */
+            --bg-gradient: linear-gradient(160deg, #ffe3b3 0%, #ffc4a3 18%, #8ecfe0 45%, #4fa8c9 72%, #0d6a8f 100%);
+            --card-bg: rgba(255, 255, 255, 0.85); /* Hiệu ứng Glassmorphism - bọt biển */
+
+            --text-main: #0b3d55; /* Xanh biển đậm thay cho đen */
+            --text-muted: #0d4f66;
+            --border-color: #a9e2ef;
+
+            --success: #2a9d8f;
+            --success-bg: #d4f4ee;
+            --error: #EF4444;
+            --error-bg: #FEE2E2;
+            --warning: #f5a623;
+
+            --sidebar-width: 320px;
+            --radius-md: 20px;
+            --radius-lg: 30px;
+            --shadow-soft: 0 10px 40px rgba(13, 79, 102, 0.18);
+            --shadow-glow: 0 0 20px rgba(255, 122, 92, 0.4);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+    		font-family: 'Quicksand', sans-serif;
+    		background: 
+        		linear-gradient(160deg, rgba(255,227,179,0.55) 0%, rgba(78,168,201,0.55) 60%, rgba(13,106,143,0.6) 100%),
+        		url('https://wallpaperaccess.com/full/715958.jpg') center center / cover no-repeat fixed;
+    		color: var(--text-main);
+    		margin: 0;
+    		display: flex;
+    		height: 100vh;
+    		overflow: hidden;
+    		font-size: 16px;
+    		line-height: 1.6;
+    		position: relative;
+		}
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* ============ TRANG TRÍ ĐẠI DƯƠNG (bọt biển & sóng) ============ */
+        .ocean-decor { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+        .bubble {
+            position: absolute;
+            bottom: -60px;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.95), rgba(255,255,255,0.15) 70%);
+            border-radius: 50%;
+            box-shadow: inset 0 0 6px rgba(255,255,255,0.6);
+            animation: bubbleRise linear infinite;
+            opacity: 0.8;
+        }
+        @keyframes bubbleRise {
+            0% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 0.8; }
+            100% { transform: translateY(-110vh) translateX(20px); opacity: 0; }
+        }
+        .wave-footer {
+            position: fixed;
+            left: 0; right: 0; bottom: 0;
+            height: 90px;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.55;
+        }
+
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #6ec6de; border-radius: 10px; border: 2px solid #fff; }
+        ::-webkit-scrollbar-thumb:hover { background: #ff7a5c; }
+
+        /* ================= SIDEBAR ================= */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-right: 2px solid rgba(255, 255, 255, 0.6);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 24px rgba(13, 79, 102, 0.12);
+            z-index: 10;
+            position: relative;
+        }
+        
+        .sidebar-header {
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom: 2px dashed var(--border-color);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-header h2 {
+            font-family: 'Baloo 2', sans-serif;
+            font-weight: 800;
+            font-size: 1.4em;
+            margin: 0;
+            background: linear-gradient(to right, #ff7a5c, #1e88a8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .sidebar-header p {
+            font-size: 0.9em;
+            color: #0d4f66;
+            margin: 8px 0 0 0;
+            font-weight: 600;
+        }
+
+        .exam-list {
+            list-style: none;
+            padding: 0 15px;
+            margin: 0;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .exam-item {
+            padding: 14px 18px;
+            margin-bottom: 10px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 700;
+            color: #0d4f66;
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px solid transparent;
+        }
+        
+        .exam-item::before {
+            content: '🐟';
+            margin-right: 12px;
+            font-size: 1.2em;
+            transition: transform 0.3s ease;
+        }
+
+        .exam-item:hover {
+            background: var(--sidebar-hover);
+            border-color: #6ec6de;
+            transform: translateX(5px);
+        }
+        
+        .exam-item:hover::before {
+            transform: rotate(20deg);
+        }
+
+        .exam-item.active {
+            background: linear-gradient(135deg, #ff9a76 0%, #1e88a8 100%);
+            color: #FFF;
+            box-shadow: var(--shadow-glow);
+            border-color: transparent;
+        }
+        
+        .exam-item.active::before { content: '🌊'; }
+
+        /* ================= MAIN CONTENT ================= */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            scroll-behavior: smooth;
+            position: relative;
+            z-index: 2;
+        }
+
+        .exam-container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding-bottom: 60px;
+            animation: floatUp 0.6s ease-out;
+        }
+
+        @keyframes floatUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glass-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .exam-title-wrapper {
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            border-top: 6px solid #ff9a76;
+        }
+
+        .exam-title {
+            font-family: 'Baloo 2', sans-serif;
+            color: var(--primary-dark);
+            font-size: 2em;
+            font-weight: 800;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(30, 136, 168, 0.15);
+        }
+
+        .section-title {
+            font-family: 'Baloo 2', sans-serif;
+            background: linear-gradient(to right, #d7f3fa, rgba(255,255,255,0));
+            padding: 12px 25px;
+            border-radius: 50px;
+            border-left: 6px solid var(--primary);
+            margin: 35px 0 20px 0;
+            font-weight: 800;
+            font-size: 1.2em;
+            color: var(--primary-dark);
+            display: inline-block;
+        }
+
+        .info-box {
+            background: rgba(255, 248, 231, 0.9);
+            border: 2px dashed #f5a623;
+            padding: 18px 25px;
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+            color: #b45309;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.1);
+        }
+
+        .passage-block {
+            padding: 30px;
+            margin-bottom: 25px;
+            font-size: 1.05em;
+            color: #4c1d95;
+            line-height: 1.8;
+        }
+
+        .passage-block h3 {
+            font-family: 'Baloo 2', sans-serif;
+            color: var(--accent-dark);
+            margin-top: 0;
+            border-bottom: 2px dashed var(--border-color);
+            padding-bottom: 12px;
+            font-size: 1.3em;
+        }
+
+        .question-block {
+            margin-bottom: 20px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .question-block:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-glow);
+            border-color: #a9e2ef;
+        }
+
+        .question-text {
+            font-weight: 700;
+            font-size: 1.1em;
+            margin-bottom: 18px;
+            color: var(--primary-dark);
+        }
+
+        /* ================= FORM ELEMENTS ================= */
+        .options { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+        
+        .custom-radio-label { 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            padding: 12px 20px;
+            border: 2px solid transparent;
+            border-radius: 15px;
+            transition: all 0.2s ease;
+            background: rgba(215, 243, 250, 0.4);
+        }
+        
+        .custom-radio-label:hover {
+            background: var(--primary-light);
+            border-color: #a9e2ef;
+        }
+
+        .custom-radio-label input[type="radio"] { display: none; }
+
+        .radio-mark {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #6ec6de;
+            border-radius: 50%;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: #fff;
+            transition: all 0.2s ease;
+        }
+
+        .custom-radio-label input[type="radio"]:checked + .radio-mark { 
+            border-color: var(--accent); 
+            background: var(--accent);
+            box-shadow: 0 0 10px rgba(255, 122, 92, 0.4);
+        }
+        
+        .custom-radio-label input[type="radio"]:checked + .radio-mark::after {
+            content: '🫧';
+            font-size: 12px;
+            color: white;
+        }
+
+        .custom-radio-label input[type="radio"]:checked ~ .option-text {
+            color: var(--primary-dark);
+            font-weight: 800;
+        }
+
+        .premium-input, .premium-select, .premium-textarea {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.05em;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 600;
+            border: 2px solid #d7f3fa;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text-main);
+            transition: all 0.3s ease;
+        }
+        
+        .premium-select { cursor: pointer; width: auto; min-width: 200px; }
+        .premium-textarea { resize: vertical; min-height: 160px; line-height: 1.6; }
+
+        .premium-input:focus, .premium-select:focus, .premium-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #FFF;
+            box-shadow: 0 0 0 4px rgba(110, 198, 222, 0.35);
+        }
+        
+        .premium-input::placeholder, .premium-textarea::placeholder {
+            color: #4fa8c9;
+            opacity: 0.7;
+        }
+
+        /* ================= SUBMIT & RESULTS ================= */
+        .btn-submit {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #ff9a76 0%, #ff7a5c 100%);
+            color: white;
+            border: none;
+            border-radius: 50px; /* Nút bo tròn như viên kẹo */
+            font-family: 'Baloo 2', sans-serif;
+            font-size: 1.25em;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 40px;
+            box-shadow: 0 10px 20px rgba(255, 122, 92, 0.35);
+        }
+
+        .btn-submit:hover:not(:disabled) { 
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 15px 25px rgba(255, 122, 92, 0.45);
+        }
+        
+        .btn-submit:disabled { 
+            background: #e2e8f0; 
+            cursor: not-allowed; 
+            box-shadow: none;
+            color: #94a3b8;
+        }
+
+        .result-panel {
+            display: none;
+            margin-top: 40px;
+            padding: 35px;
+            text-align: center;
+            border: 3px solid #2a9d8f;
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .result-panel h2 {
+            font-family: 'Baloo 2', sans-serif;
+            color: #1e7d70;
+            font-size: 2.2em;
+            margin: 0 0 15px 0;
+            text-shadow: 1px 1px 2px rgba(42, 157, 143, 0.2);
+        }
+
+        .explanation {
+            margin-top: 20px;
+            padding: 18px 20px;
+            background: #fff2ec;
+            border-radius: 12px;
+            border-left: 5px solid var(--accent);
+            display: none;
+            font-size: 1em;
+            color: #7a3319;
+        }
+        
+        .explanation strong { color: var(--accent-dark); font-family: 'Baloo 2', sans-serif; }
+    </style>
+</head>
+<body>
+
+    <!-- TRANG TRÍ ĐẠI DƯƠNG: bọt biển bay lên + sóng biển cuối trang -->
+    <div class="ocean-decor" aria-hidden="true">
+        <div class="bubble" style="left:6%;  width:14px; height:14px; animation-duration:14s; animation-delay:0s;"></div>
+        <div class="bubble" style="left:16%; width:22px; height:22px; animation-duration:19s; animation-delay:2s;"></div>
+        <div class="bubble" style="left:28%; width:10px; height:10px; animation-duration:11s; animation-delay:1s;"></div>
+        <div class="bubble" style="left:40%; width:18px; height:18px; animation-duration:16s; animation-delay:4s;"></div>
+        <div class="bubble" style="left:55%; width:12px; height:12px; animation-duration:13s; animation-delay:3s;"></div>
+        <div class="bubble" style="left:68%; width:24px; height:24px; animation-duration:21s; animation-delay:1.5s;"></div>
+        <div class="bubble" style="left:80%; width:16px; height:16px; animation-duration:17s; animation-delay:5s;"></div>
+        <div class="bubble" style="left:92%; width:11px; height:11px; animation-duration:12s; animation-delay:2.5s;"></div>
+        <svg class="wave-footer" viewBox="0 0 1440 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,40 C240,90 480,0 720,40 C960,80 1200,10 1440,50 L1440,100 L0,100 Z" fill="#0d6a8f"></path>
+            <path d="M0,60 C240,100 480,30 720,65 C960,95 1200,40 1440,70 L1440,100 L0,100 Z" fill="#1e88a8" opacity="0.7"></path>
+        </svg>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>🐚 Đề thi thử vào 10 chuyên các tỉnh thành 🌊</h2>
+            <p>Tuyển tập đề thi vào 10</p>
+        </div>
+        <ul class="exam-list" id="exam-list-container">
+            <!-- Render danh sách đề -->
+        </ul>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div class="exam-container">
+            <div class="glass-panel exam-title-wrapper">
+                <h1 class="exam-title" id="display-exam-title">Vui lòng chọn đề thi</h1>
+            </div>
+            
+            <form id="quiz-form" action="https://formspree.io/f/MÃ_CỦA_BẠN" method="POST">
+    <!-- Thêm các ô ẩn để chứa điểm số và bài luận gửi về email -->
+    <input type="hidden" name="exam_title" id="hidden_exam_title">
+    <input type="hidden" name="score" id="hidden_score">
+    <input type="hidden" name="essay" id="hidden_essay">
+
+                <!-- THÔNG TIN HỌC SINH -->
+
+                <div class="glass-panel question-block" style="border-left: 6px solid #ff7a5c; background: rgba(235, 249, 252, 0.9);">
+                    <div class="question-text" style="color: var(--primary-dark); font-size: 1.2em;">🌷 Thông tin học sinh (Bắt buộc)</div>
+                    <input type="text" id="student_name" class="premium-input" placeholder="Họ và tên của cậu là..." style="margin-bottom: 15px;" required>
+                    <input type="email" id="student_email" class="premium-input" placeholder="Địa chỉ Email..." required>
+                </div>
+
+                <div id="questions-container"></div>
+                <button type="button" class="btn-submit" id="submit-btn" style="display:none;" onclick="submitQuiz()">Nộp bài & Chấm điểm 🐚</button>
+            </form>
+
+            <div class="glass-panel result-panel" id="result-container">
+                <h2>Kết Quả: <span id="score-text"></span> 🎉</h2>
+                <p style="font-weight: 600; font-size: 1.1em; color: #4c1d95;">Tuyệt vời! Kết quả và bài làm của cậu đã được gửi đi an toàn.<br>Cậu có thể lướt lên trên để xem chi tiết đáp án nhé! 🌊</p>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // Cơ sở dữ liệu đề thi
+    const examDatabase = [
+        {
+            id: "exam_khanhhoa",
+            title: "Đề Chuyên Anh Khánh Hoà 2026",
+            data: [
+                { type: "title", text: "I. LEXICO-GRAMMAR (30 points) - Part 1" },
+                { type: "mcq", id: 1, question: "1. The social media post became extremely popular and turned into ______ within a few hours.", options: { A: "algorithm", B: "viral content", C: "press release", D: "editorial" }, correctAnswer: "B", explanation: "Đáp án B. 'viral content' (nội dung lan truyền). Cụm từ mô tả sự phổ biến bùng nổ trên mạng xã hội." },
+                { type: "mcq", id: 2, question: "2. After spending hours scrolling through low-quality videos, he felt like he was experiencing serious ______.", options: { A: "brain rot", B: "cybersecurity", C: "digital transformation", D: "digital footprint" }, correctAnswer: "A", explanation: "Đáp án A. 'brain rot' (sự mụ mẫm đầu óc). Phù hợp với ngữ cảnh xem video chất lượng kém trong nhiều giờ." },
+                { type: "mcq", id: 3, question: "3. He made a ______ decision without considering the potential long-term risks involved.", options: { A: "short-sight", B: "sight-short", C: "short-sighting", D: "short-sighted" }, correctAnswer: "D", explanation: "Đáp án D. 'short-sighted' (tầm nhìn hạn hẹp/thiển cận)." },
+                { type: "mcq", id: 4, question: "4. After hearing the news, she felt completely ______ and unable to speak.", options: { A: "heart-breaking", B: "heart-broken", C: "broken-heart", D: "heart-break" }, correctAnswer: "B", explanation: "Đáp án B. 'heart-broken' (đau lòng). Dùng phân từ hai (V-ed) để miêu tả cảm xúc của con người." },
+                { type: "mcq", id: 5, question: "5. The professor encouraged a ______ approach to solving real-world problems in class discussions.", options: { A: "problem-solving", B: "problem solved", C: "solving-problem", D: "solved-problem" }, correctAnswer: "A", explanation: "Đáp án A. 'problem-solving' (mang tính giải quyết vấn đề). Đóng vai trò làm tính từ bổ nghĩa cho danh từ 'approach'." },
+                { type: "mcq", id: 6, question: "6. The app is designed to be ______, even for users with limited technical skills.", options: { A: "users friendly", B: "using-friendly", C: "friendly-users", D: "user-friendly" }, correctAnswer: "D", explanation: "Đáp án D. 'user-friendly' (thân thiện với người dùng). Cụm tính từ ghép quen thuộc trong công nghệ." },
+                { type: "mcq", id: 7, question: "7. The company invested heavily in ______ equipment to stay competitive in the global market.", options: { A: "state-of-the-art", B: "states of the art", C: "the-state-of-art", D: "state-of-the-arts" }, correctAnswer: "A", explanation: "Đáp án A. 'state-of-the-art' (hiện đại nhất, tân tiến nhất)." },
+                { type: "mcq", id: 8, question: "8. The event was canceled ______ unexpected weather conditions that made it unsafe for participants.", options: { A: "in contrast with", B: "in addition to", C: "on account of", D: "as opposed to" }, correctAnswer: "C", explanation: "Đáp án C. 'on account of' = because of (bởi vì)." },
+                { type: "mcq", id: 9, question: "9. The policy was introduced ______ reducing traffic congestion in urban areas.", options: { A: "with a view to", B: "in lieu of", C: "in contrast with", D: "in exchange for" }, correctAnswer: "A", explanation: "Đáp án A. 'with a view to + V-ing' (với mục đích làm gì)." },
+                { type: "mcq", id: 10, question: "10. The problem was solved ______ a simple adjustment to the system settings, rather than a complete overhaul.", options: { A: "by means of", B: "on no account", C: "in case of", D: "regardless of" }, correctAnswer: "A", explanation: "Đáp án A. 'by means of' (bằng phương pháp/cách thức nào đó)." },
+                { type: "mcq", id: 11, question: "11. ______ unforgettable journey we had while exploring the ancient town during our summer vacation together!", options: { A: "How an", B: "What", C: "What an", D: "How" }, correctAnswer: "C", explanation: "Đáp án C. Cấu trúc câu cảm thán: 'What + a/an + adj + N đếm được số ít!'. Do 'unforgettable' bắt đầu bằng nguyên âm nên dùng 'an'." },
+                { type: "mcq", id: 12, question: "12. She studied every chapter carefully and reviewed her notes twice; ______, she passed the final exam with excellent results.", options: { A: "unfortunately", B: "simultaneously", C: "consequently", D: "similarly" }, correctAnswer: "C", explanation: "Đáp án C. 'consequently' (kết quả là, do đó). Phù hợp về mặt logic nguyên nhân - kết quả." },
+                { type: "mcq", id: 13, question: "13. The speech was inspiring and easy to understand; ______, it encouraged many students to volunteer for community projects.", options: { A: "in turn", B: "in case", C: "in contrast", D: "in brief" }, correctAnswer: "A", explanation: "Đáp án A. 'in turn' (từ đó, dẫn tới kết quả tiếp theo)." },
+                { type: "mcq", id: 14, question: "14. She would have missed the international flight yesterday ______ her brother reminding her about the passport.", options: { A: "but for", B: "or else", C: "even if", D: "because of" }, correctAnswer: "A", explanation: "Đáp án A. 'but for + N/V-ing' (nếu không có...). Cấu trúc câu điều kiện loại 3 ẩn ý." },
+                { type: "mcq", id: 15, question: "15. The more carefully you prepare for the interview, ______ you will be.", options: { A: "as confident as", B: "as confidently as", C: "the more confidently", D: "the more confident" }, correctAnswer: "D", explanation: "Đáp án D. Cấu trúc so sánh kép: 'The + so sánh hơn + S + V, the + so sánh hơn + S + V'." },
+                { type: "mcq", id: 16, question: "16. The athlete was reported ______ intensive training before winning the international championship last month.", options: { A: "to be completed", B: "to have completed", C: "completing", D: "having completed" }, correctAnswer: "B", explanation: "Đáp án B. Câu bị động đặc biệt với hành động xảy ra trước thời điểm tường thuật, ta dùng 'to have + VpII'." },
+                { type: "mcq", id: 17, question: "17. ______ he needs most right now is enough confidence to start speaking English in public.", options: { A: "What", B: "That", C: "Whether", D: "Why" }, correctAnswer: "A", explanation: "Đáp án A. 'What' đóng vai trò làm chủ ngữ cho mệnh đề danh ngữ (Điều mà anh ấy cần nhất...)." },
+                { type: "mcq", id: 18, question: "18. They adopted a ______ dog from the local animal rescue center last weekend.", options: { A: "little white lovely", B: "white lovely little", C: "lovely little white", D: "lovely white little" }, correctAnswer: "C", explanation: "Đáp án C. Trật tự tính từ: OSASCOMP. Opinion (lovely) -> Size (little) -> Color (white)." },
+                { type: "mcq", id: 19, question: "19. Nobody in the class has submitted the final assignment yet, ______?", options: { A: "have they", B: "hasn't he", C: "did they", D: "has nobody" }, correctAnswer: "A", explanation: "Đáp án A. Đại từ thay thế cho 'Nobody' trong câu hỏi đuôi là 'they'. 'Nobody' mang nghĩa phủ định nên phần đuôi ở dạng khẳng định." },
+                { type: "mcq", id: 20, question: "20. Neither the manager nor the employees ______ aware of the issue.", options: { A: "was", B: "were", C: "is", D: "be" }, correctAnswer: "B", explanation: "Đáp án B. Cấu trúc 'Neither N1 nor N2' thì động từ chia theo N2 (the employees - số nhiều)." },
+                
+                { type: "title", text: "Part 2 - Word Formation (Điền từ)" },
+                { type: "fill", id: 21, question: "21. Phở drifts into the morning like a soft memory, and its arrival is almost ______ (NOTICE), yet deeply felt.", correctAnswer: "unnoticed", explanation: "Từ cần điền là 'unnoticed' (tính từ). Dấu hiệu: 'yet' chỉ sự tương phản với 'deeply felt', tức là sự xuất hiện diễn ra mà không ai để ý tới." },
+                { type: "fill", id: 22, question: "22. The rising steam forms an intriguing ______ (MIX) of scent and silence...", correctAnswer: "mixture", explanation: "Đáp án: mixture. Cần một danh từ đứng sau tính từ 'intriguing'." },
+                { type: "fill", id: 23, question: "23. ...where herbs and broth seem to ______ (BREATH) together.", correctAnswer: "breathe", explanation: "Đáp án: breathe. Cần một động từ nguyên thể đứng sau cấu trúc 'seem to'." },
+                { type: "fill", id: 24, question: "24. There is an artful refinement in every detail, a slow ______ (DEVOTE) shaped by hands...", correctAnswer: "devotion", explanation: "Đáp án: devotion. Cần một danh từ đứng sau tính từ 'slow'." },
+                { type: "fill", id: 25, question: "25. ...shaped by hands both ______ (KNOW) and patient.", correctAnswer: "knowing", explanation: "Đáp án: knowing. Cần một tính từ song hành với 'patient'." },
+                { type: "fill", id: 26, question: "26. The flavors gather in subtle depth, not demanding attention, but inviting it softly and ______ (PERSIST).", correctAnswer: "persistently", explanation: "Đáp án: persistently. Cần một trạng từ bổ nghĩa cho động từ 'inviting' và song hành với trạng từ 'softly'." },
+                { type: "fill", id: 27, question: "27. Each bowl feels charming, not in extravagance, but in its quiet ______ (HONEST).", correctAnswer: "honesty", explanation: "Đáp án: honesty. Cần một danh từ đứng sau tính từ sở hữu 'its' và tính từ 'quiet'." },
+                { type: "fill", id: 28, question: "28. Beyond taste, there is something more elusive. A quiet ______ (WARM) settles...", correctAnswer: "warmth", explanation: "Đáp án: warmth. Cần một danh từ làm chủ ngữ." },
+                { type: "fill", id: 29, question: "29. ...settles, almost ______ (CONSCIOUS), like a forgotten feeling returning.", correctAnswer: "unconsciously", explanation: "Đáp án: unconsciously. Cần một trạng từ để bổ nghĩa cho động từ 'settles'." },
+                { type: "fill", id: 30, question: "30. The world outside may remain restless and ______ (CHANGE), but here, something stays still.", correctAnswer: "changing", explanation: "Đáp án: changing (hoặc changeable). Cần tính từ song hành với 'restless'." },
+                
+                { 
+                    type: "title", 
+                    text: "Part 3. The passage below contains 10 mistakes. Identify the mistakes and write your corrections in the numbered boxes provided." 
+                },
+                { 
+                    type: "passage", 
+                    text: `<div style="font-family: 'Times New Roman', Times, serif; font-size: 1.15em; line-height: 1.8; padding: 25px; background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: inset 0 0 10px rgba(0,0,0,0.02); color: #000;">
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(1)</span><div>One of the most influential self-help books of modern times (0) <i>are Awaken the Giant Within</i> by</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(2)</span><div>Anthony Robbins. First publishing in 1991, the book focuses on helping individuals take control of</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(3)</span><div>their emotions, financial, relationships, and overall life direction. In this book, Robbins argues that</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(4)</span><div>people often limit them through negative beliefs and habits. He introduces practical strategies to</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(5)</span><div>change one's mindset and behaviour pattern. According to Robbins, true change begins with making</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(6)</span><div>clear decisions and consistently take action toward personal goals. A key idea in the book is the</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(7)</span><div>concept of "personal power", which Robbins believes everyone possess. Robbins believes that</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(8)</span><div>everyone has an inner strength or "giant" that can be awake through discipline and self-awareness.</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(9)</span><div>The book also emphasizes the importance of set specific and meaningful goals.</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(10)</span><div><i>Awaken the Giant Within</i> not only provides inspiration but also motivations readers to take</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(11)</span><div>action. Many readers find the book so helpful that they recommend it to other interested in personal</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(12)</span><div>growth.</div></div>
+                        <div style="margin-top: 20px; font-weight: bold; color: var(--primary-dark);">Your answers: (0) line 1: are &rarr; is</div>
+                    </div>` 
+                },
+                { type: "fill", id: 31, question: "31. Line 2 (Lỗi: publishing) &rarr; Sửa thành:", correctAnswer: "published", explanation: "Đáp án: published. Đây là mệnh đề phân từ rút gọn mang nghĩa bị động (Cuốn sách ĐƯỢC xuất bản)." },
+                { type: "fill", id: 32, question: "32. Line 3 (Lỗi: financial) &rarr; Sửa thành:", correctAnswer: "finances", explanation: "Đáp án: finances. Cấu trúc song hành yêu cầu các từ nối với nhau bằng 'and' phải cùng từ loại. Emotions và relationships là danh từ, do đó 'financial' phải đổi thành danh từ." },
+                { type: "fill", id: 33, question: "33. Line 4 (Lỗi: them) &rarr; Sửa thành:", correctAnswer: "themselves", explanation: "Đáp án: themselves. Chủ ngữ và tân ngữ chỉ cùng một đối tượng, do đó phải dùng đại từ phản thân." },
+                { type: "fill", id: 34, question: "34. Line 5 (Lỗi: pattern) &rarr; Sửa thành:", correctAnswer: "patterns", explanation: "Đáp án: patterns. Chỉ các khuôn mẫu hành vi nói chung (có đếm được) nên dùng ở dạng số nhiều." },
+                { type: "fill", id: 35, question: "35. Line 6 (Lỗi: take) &rarr; Sửa thành:", correctAnswer: "taking", explanation: "Đáp án: taking. Song hành với V-ing 'making' ở vế trước do cùng chịu sự chi phối của giới từ 'with'." },
+                { type: "fill", id: 36, question: "36. Line 7 (Lỗi: possess) &rarr; Sửa thành:", correctAnswer: "possesses", explanation: "Đáp án: possesses. Đại từ bất định 'everyone' luôn đi với động từ chia ở ngôi thứ 3 số ít." },
+                { type: "fill", id: 37, question: "37. Line 8 (Lỗi: awake) &rarr; Sửa thành:", correctAnswer: "awakened", explanation: "Đáp án: awakened. Cấu trúc bị động của động từ khuyết thiếu: can be + V-p2." },
+                { type: "fill", id: 38, question: "38. Line 9 (Lỗi: set) &rarr; Sửa thành:", correctAnswer: "setting", explanation: "Đáp án: setting. Động từ đứng sau giới từ 'of' phải chia ở dạng V-ing." },
+                { type: "fill", id: 39, question: "39. Line 10 (Lỗi: motivations) &rarr; Sửa thành:", correctAnswer: "motivates", explanation: "Đáp án: motivates. Cấu trúc song hành 'not only... but also', phía trước là động từ thì sau cũng là động từ." },
+                { type: "fill", id: 40, question: "40. Line 11 (Lỗi: other) &rarr; Sửa thành:", correctAnswer: "others", explanation: "Đáp án: others. Cần đại từ đóng vai trò làm tân ngữ chỉ 'những người khác'." },   
+                
+                { type: "title", text: "II. READING (40 points) - Part 1: Open Cloze Test" },
+                { type: "passage", text: "<h3>Little Things, Deep Happiness</h3><p>People often believe happiness comes only (0) <b>with</b> success, distant journeys, or the moment long-cherished dreams finally come true. They wait <b>(41)</b> ______ the 'right moment', thinking life will only become meaningful then. Yet, true joy often hides in the smallest, quietest moments.</p><p>A simple dinner with family, the smell of rain after a hot day, or a gentle message from someone asking if we are alright can warm the heart beyond words. <b>(42)</b> ______ such moments are easy to overlook because they seem too ordinary. We spend <b>(43)</b> ______ much time looking ahead that we forget what is already here. It does not mean giving up ambition or forgetting our goals. <b>(44)</b> ______, it means learning to pause and treasure the present.</p><p>Sometimes, happiness is sitting beside someone you love in <b>(45)</b> ______, saying nothing, and still feeling understood. It is hearing your mother call your name or watching the sky turn orange at sunset. These moments remind us <b>(46)</b> ______ life is built not only on success, but also on affection, gratitude, and human connection. We become <b>(47)</b> ______ peaceful and less afraid of whatever tomorrow may bring.</p><p>Love appears not in expensive gifts <b>(48)</b> ______ in small daily kindnesses - a glass of water offered, a patient ear, or a warm and sincere smile. They often mean far <b>(49)</b> ______ than we realize. Joy is not something we search <b>(50)</b> ______. It is already around us, waiting softly to be seen.</p>" },
+                { type: "fill", id: 41, question: "41. (Điền 1 từ vào chỗ trống số 41)", correctAnswer: "for", explanation: "Đáp án: for. Cấu trúc 'wait for something' (chờ đợi điều gì đó)." },
+                { type: "fill", id: 42, question: "42. (Điền 1 từ vào chỗ trống số 42)", correctAnswer: "but", explanation: "Đáp án: but / yet / however. Cần một liên từ mang nghĩa tương phản." },
+                { type: "fill", id: 43, question: "43. (Điền 1 từ vào chỗ trống số 43)", correctAnswer: "so", explanation: "Đáp án: so. Cấu trúc 'so + adj/adv + that + clause'." },
+                { type: "fill", id: 44, question: "44. (Điền 1 từ vào chỗ trống số 44)", correctAnswer: "instead", explanation: "Đáp án: Instead / Rather. Đứng đầu câu, mang nghĩa 'Thay vào đó'." },
+                { type: "fill", id: 45, question: "45. (Điền 1 từ vào chỗ trống số 45)", correctAnswer: "silence", explanation: "Đáp án: silence. Cụm từ 'in silence' (trong im lặng)." },
+                { type: "fill", id: 46, question: "46. (Điền 1 từ vào chỗ trống số 46)", correctAnswer: "that", explanation: "Đáp án: that. Cấu trúc 'remind someone that + clause'." },
+                { type: "fill", id: 47, question: "47. (Điền 1 từ vào chỗ trống số 47)", correctAnswer: "more", explanation: "Đáp án: more. Song hành với dạng so sánh hơn ở vế sau 'less afraid' -> 'more peaceful'." },
+                { type: "fill", id: 48, question: "48. (Điền 1 từ vào chỗ trống số 48)", correctAnswer: "but", explanation: "Đáp án: but. Cấu trúc 'not... but...' (không phải... mà là...)." },
+                { type: "fill", id: 49, question: "49. (Điền 1 từ vào chỗ trống số 49)", correctAnswer: "more", explanation: "Đáp án: more. Cấu trúc so sánh hơn với 'than', có 'far' đứng trước để nhấn mạnh." },
+                { type: "fill", id: 50, question: "50. (Điền 1 từ vào chỗ trống số 50)", correctAnswer: "for", explanation: "Đáp án: for. Cụm động từ 'search for' (tìm kiếm)." },
+                
+                { type: "title", text: "Part 2: Guided Cloze Test - Read the passage and choose the best answer." },
+                { type: "passage", text: "<h3>Omotenashi</h3><p>In Japan, the concept of omotenashi represents a (0) <b>deeply</b> rooted tradition of selfless service, where hosts anticipate guests' needs without expecting anything in return. During a traditional tea ceremony, the host may <b>(51)</b> ______ each movement with extreme precision, turning a simple drink into an art form. Guests are encouraged to <b>(52)</b> ______ the quiet atmosphere and notice subtle gestures. Silence is not awkward but <b>(53)</b> ______ valued as part of the experience.</p><p>This cultural practice is based on the idea that one should <b>(54)</b> ______ fully in the present moment, leaving distractions behind. Even the arrangement of utensils can have a significant <b>(55)</b> ______ on the emotional experience of the guest.</p><p>Tourists who are <b>(56)</b> ______ through such ceremonies often report feeling unexpectedly calm. They also become more <b>(57)</b> ______ of small details that are usually ignored in daily life. Compared with Western-style hospitality, omotenashi is less <b>(58)</b> ______ on verbal communication and more on thoughtful action.</p><p>This philosophy continues to influence modern society. It is now <b>(59)</b> ______ in many service training programs, and many international hotels <b>(60)</b> ______ elements of this approach.</p>" },
+                { type: "mcq", id: 51, question: "51. Choose the correct answer for blank (51):", options: { A: "promote", B: "foster", C: "perform", D: "rehearse" }, correctAnswer: "C", explanation: "Đáp án C. perform (thực hiện). 'Perform each movement' nghĩa là thực hiện từng động tác một cách chuẩn xác." },
+                { type: "mcq", id: 52, question: "52. Choose the correct answer for blank (52):", options: { A: "undermine", B: "appreciate", C: "flatter", D: "celebrate" }, correctAnswer: "B", explanation: "Đáp án B. appreciate (trân trọng, thưởng thức). Phù hợp với ngữ cảnh thưởng thức bầu không khí tĩnh lặng." },
+                { type: "mcq", id: 53, question: "53. Choose the correct answer for blank (53):", options: { A: "fully", B: "utterly", C: "highly", D: "strongly" }, correctAnswer: "C", explanation: "Đáp án C. highly. Collocation 'highly valued' (được đánh giá cao, được trân trọng)." },
+                { type: "mcq", id: 54, question: "54. Choose the correct answer for blank (54):", options: { A: "engage", B: "embody", C: "immerse", D: "attend" }, correctAnswer: "A", explanation: "Đáp án A. engage. Đi với giới từ 'in' (engage in: tham gia vào, hòa mình vào)." },
+                { type: "mcq", id: 55, question: "55. Choose the correct answer for blank (55):", options: { A: "consequence", B: "improvement", C: "impact", D: "limitation" }, correctAnswer: "C", explanation: "Đáp án C. impact. Cấu trúc 'have an impact on something' (có tác động/ảnh hưởng đến điều gì)." },
+                { type: "mcq", id: 56, question: "56. Choose the correct answer for blank (56):", options: { A: "diverted", B: "led", C: "carried", D: "attended" }, correctAnswer: "B", explanation: "Đáp án B. led. Dạng bị động 'are led' mang nghĩa được dẫn dắt, hướng dẫn qua các nghi lễ." },
+                { type: "mcq", id: 57, question: "57. Choose the correct answer for blank (57):", options: { A: "aware", B: "apprehensive", C: "sensitive", D: "attentive" }, correctAnswer: "A", explanation: "Đáp án A. aware. Cấu trúc 'aware of' (nhận thức được, nhận ra)." },
+                { type: "mcq", id: 58, question: "58. Choose the correct answer for blank (58):", options: { A: "focused", B: "reflected", C: "relied", D: "imposed" }, correctAnswer: "A", explanation: "Đáp án A. focused. Cấu trúc 'focused on' (tập trung vào)." },
+                { type: "mcq", id: 59, question: "59. Choose the correct answer for blank (59):", options: { A: "redundant", B: "external", C: "integral", D: "minor" }, correctAnswer: "C", explanation: "Đáp án C. integral (thiết yếu, không thể thiếu). Triết lý này hiện là phần thiết yếu trong các chương trình đào tạo." },
+                { type: "mcq", id: 60, question: "60. Choose the correct answer for blank (60):", options: { A: "reject", B: "adopt", C: "abandon", D: "resist" }, correctAnswer: "B", explanation: "Đáp án B. adopt (áp dụng, tiếp nhận)." },
+                
+                { type: "title", text: "Part 3: Read the passage 'Gratitude in a Restless World' and do the tasks." },
+                { type: "passage", text: "<h3>Gratitude in a Restless World</h3><p><strong>[A]</strong> On a crowded train during the evening rush, most passengers are absorbed in their own private worlds - scrolling through phones, answering emails, or simply staring blankly ahead. It is easy, in such moments, to feel disconnected, as if life were a series of obligations rather than experiences to be valued. Yet, scattered among these ordinary scenes are quiet instances of gratitude: a commuter offering a seat to an elderly stranger, a brief smile exchanged between two tired workers, or a message of thanks sent at the end of a long day. These small gestures suggest that gratitude, though often overlooked, remains a powerful force in modern life. In fact, gratitude is commonly defined as the appreciation of what is valuable and meaningful to oneself. However, this definition barely captures its depth. It is not merely a polite response to kindness or a social convention reinforced by upbringing; rather, it is a way of seeing the world. Individuals who cultivate gratitude tend to notice not only grand achievements but also the subtle moments that give life texture - the warmth of sunlight on a cold morning, the comfort of familiar routines, or the presence of supportive relationships.</p><p><strong>[B]</strong> In recent years, psychologists have taken a growing interest in gratitude, seeking to understand its impact on human well-being. Studies suggest that people who regularly reflect on what they are thankful for report higher levels of happiness and lower levels of stress. This is partly because gratitude shifts attention away from what is lacking toward what is already present. In a culture that often emphasizes comparison and achievement, such a shift can be both refreshing and transformative. Moreover, the influence of gratitude extends beyond the individual. In social contexts, expressions of appreciation can strengthen relationships and foster trust. When people feel acknowledged, they are more likely to engage positively with others, creating a cycle of goodwill. For example, a simple thank-you in the workplace can increase motivation and cooperation, while in personal relationships, it can deepen emotional connections. In this sense, gratitude functions as a kind of social glue, binding individuals together in mutual respect.</p><p><strong>[C]</strong> Despite its many benefits, gratitude does not always come naturally. Modern life, with its constant demands and distractions, can make it difficult to pause and reflect. People often take positive aspects of their lives for granted, focusing instead on problems or unmet expectations. This tendency is sometimes referred to as the 'negativity bias,' a psychological phenomenon in which negative experiences have a greater impact on our thoughts and emotions than positive ones. Overcoming this bias requires conscious effort and practice. One widely recommended approach is the use of a gratitude journal. By writing down a few things each day that one is thankful for, individuals can gradually train their minds to recognize positive experiences more readily. Over time, this practice can reshape habitual patterns of thinking, making gratitude a more automatic response. Another method involves expressing appreciation directly to others, whether through spoken words, written notes, or simple acts of kindness.</p><p><strong>[D]</strong> Such expressions not only benefit the recipient but also reinforce the giver's own sense of gratitude. However, it is important to note that gratitude is not about ignoring difficulties or pretending that everything is perfect. Rather, it coexists with hardship, offering a way to find meaning even in challenging circumstances. For instance, someone facing adversity may still feel grateful for the support of friends or the lessons learned through struggle. In this way, gratitude does not eliminate suffering but can make it more bearable, providing a sense of perspective and resilience. Cultural differences also shape how gratitude is expressed and understood. In some societies, it is conveyed openly through words and gestures, while in others, it may be demonstrated more subtly through actions. Regardless of these variations, the underlying principle remains consistent: an acknowledgment of the value that others and the world contribute to one's life.</p><p><strong>[E]</strong> This universality suggests that gratitude is a fundamental aspect of human experience, transcending language and tradition. Ultimately, gratitude invites a shift in attention - from what is missing to what is present, from dissatisfaction to appreciation. It encourages individuals to engage more fully with their surroundings and to recognize the interconnectedness of human lives. In a world that often feels hurried and fragmented, such a perspective can offer a sense of grounding. As the train reaches its final stop and passengers disperse into the night, the brief encounters of the day fade into memory. Yet, the moments of gratitude - however small - linger quietly, shaping how individuals perceive their lives and their relationships. Though it may not solve every problem, gratitude has the potential to transform the ordinary into something meaningful, reminding us that even in the midst of routine, there is much to be thankful for.</p>" },
+                { type: "info", text: "<strong>For questions 61-65, choose the most suitable heading for each paragraph (A-E) from the list of headings (i-vii) below.</strong><br><br><strong>List of headings:</strong><br>i. Gratitude as a source of resilience and a universal human experience<br>ii. Scientific evidence and the social effects of gratitude<br>iii. Everyday examples and the deeper meaning of gratitude<br>iv. Final reflections on gratitude in ordinary life<br>v. Why gratitude is difficult and how to practise it<br>vi. Gratitude in professional success<br>vii. Cultural differences in emotional expression" },
+                { type: "dropdown", id: 61, question: "61. Paragraph A", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], correctAnswer: "iii", explanation: "Đoạn A đưa ra các ví dụ thường ngày (everyday examples) trên chuyến tàu và định nghĩa ý nghĩa sâu xa của lòng biết ơn." },
+                { type: "dropdown", id: 62, question: "62. Paragraph B", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], correctAnswer: "ii", explanation: "Đoạn B nói về nghiên cứu khoa học (psychologists, studies) và tác động xã hội (social contexts) của lòng biết ơn." },
+                { type: "dropdown", id: 63, question: "63. Paragraph C", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], correctAnswer: "v", explanation: "Đoạn C nói về tại sao khó khăn (negativity bias) và cách thực hành (gratitude journal)." },
+                { type: "dropdown", id: 64, question: "64. Paragraph D", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], correctAnswer: "i", explanation: "Đoạn D nhắc đến khả năng phục hồi (resilience, hardship) và sự khác biệt văn hóa chứng tỏ tính phổ quát (universal)." },
+                { type: "dropdown", id: 65, question: "65. Paragraph E", options: ["i", "ii", "iii", "iv", "v", "vi", "vii"], correctAnswer: "iv", explanation: "Đoạn E là những suy ngẫm cuối cùng (final reflections) trên chuyến tàu về đời sống thường ngày." },
+                { type: "info", text: "<strong>The reading passage has five paragraphs, A-E. Which paragraph contains the following information?</strong>" },
+                { type: "dropdown", id: 66, question: "66. A mention of a psychological habit that causes people to focus more on negative experiences:", options: ["A", "B", "C", "D", "E"], correctAnswer: "C", explanation: "Nằm ở đoạn C, tác giả nhắc đến 'negativity bias' - xu hướng tập trung vào điều tiêu cực." },
+                { type: "dropdown", id: 67, question: "67. An example showing that appreciation at work can improve teamwork and motivation:", options: ["A", "B", "C", "D", "E"], correctAnswer: "B", explanation: "Nằm ở đoạn B, câu 'For example, a simple thank-you in the workplace can increase motivation and cooperation'." },
+                { type: "info", text: "<strong>For questions 68-70, complete the summary, using ONE WORD from the list of words below:</strong><br><br><strong>Word list:</strong> trust / journal / comparison / culture / stress / routine / support / achievement" },
+                { type: "dropdown", id: 68, question: "68. Researchers have found that gratitude improves well-being by lowering levels of ______", options: ["trust", "journal", "comparison", "culture", "stress", "routine", "support", "achievement"], correctAnswer: "stress", explanation: "Đoạn B có câu: 'report higher levels of happiness and lower levels of stress'." },
+                { type: "dropdown", id: 69, question: "69. ...and helping people shift attention away from constant ______ with others.", options: ["trust", "journal", "comparison", "culture", "stress", "routine", "support", "achievement"], correctAnswer: "comparison", explanation: "Đoạn B có câu: 'In a culture that often emphasizes comparison...'" },
+                { type: "dropdown", id: 70, question: "70. One effective method of developing gratitude is keeping a gratitude ______, where individuals regularly record positive experiences.", options: ["trust", "journal", "comparison", "culture", "stress", "routine", "support", "achievement"], correctAnswer: "journal", explanation: "Đoạn C khuyên dùng 'a gratitude journal' (nhật ký biết ơn)." },
+                
+                { type: "passage", text: "<h3>Matcha: A Convergence of Ritual, Chemistry, and Global Demand</h3><p>In contemporary consumer culture, matcha has been rebranded as both a superfood and a lifestyle symbol. Yet such modern interpretations obscure its complex historical trajectory and cultural specificity. Unlike conventional infusions, in which leaves are steeped and discarded, matcha entails the ingestion of the entire leaf in powdered form. This seemingly simple distinction has profound implications not only for its nutritional profile but also for its symbolic and economic value.</p><p>The origins of matcha are frequently misattributed exclusively to Japan; however, its conceptual precursor emerged during the Tang Dynasty in China, when tea was processed into compressed forms for storage and transport. It was during the Song Dynasty, though, that powdered tea preparation gained prominence. This practice was subsequently transmitted to Japan in the late 12th century by the Zen monk Eisai, who advocated its use in monastic settings. Eisai's writings emphasized not merely the physiological effects of tea, but also its capacity to cultivate mental discipline.</p><p>Central to matcha's appeal within Zen Buddhism was its unique biochemical composition. While caffeine is typically associated with heightened alertness, it often induces restlessness when consumed in isolation. Matcha, by contrast, contains L-theanine, an amino acid that modulates the stimulatory effects of caffeine. The result is a sustained state of attentiveness devoid of the abrupt fluctuations commonly referred to as 'crashes.' This synergy rendered matcha particularly suitable for extended meditative practices, during which both concentration and composure are essential.</p><p>Over subsequent centuries, matcha became codified within the Japanese tea ceremony, or chanoyu, a highly ritualized practice governed by aesthetic and philosophical principles. The ceremony is not merely a method of beverage preparation, but an embodied expression of values such as wabi-sabi (an appreciation of imperfection) and ichigo ichie (the uniqueness of each encounter). Participants are expected to engage with the process attentively, as even minor gestures are imbued with meaning. In this context, matcha transcends its material form to become a medium of cultural transmission.</p><p>From a nutritional standpoint, matcha has been widely promoted as a potent source of antioxidants, particularly catechins such as epigallocatechin gallate (EGCG). These compounds have been linked to a range of potential health benefits, including anti-inflammatory effects and cardiovascular support. Nevertheless, it is important to distinguish between preliminary findings and clinically substantiated outcomes. While some studies suggest metabolic enhancement, the extent of such effects remains contested within the scientific community.</p><p>The cultivation of matcha-grade tea leaves involves a series of deliberate interventions designed to alter the plant's chemical composition. Prior to harvest, tea bushes are shaded for several weeks, a process that increases chlorophyll production while simultaneously elevating amino acid levels. Following harvesting, the leaves undergo steaming to prevent oxidation, after which they are meticulously sorted. The removal of stems and veins yields tencha, the raw material that is solely ground into matcha using granite mills. This process is inherently inefficient, with high-quality production requiring significant time and expertise.</p><p>As global demand for matcha has surged, so too have concerns regarding commodification and authenticity. The term 'matcha' has been applied indiscriminately across a wide spectrum of products, many of which bear little resemblance to traditional forms. Culinary-grade matcha, for instance, is often characterized by a more bitter profile and diminished vibrancy in color, making it suitable for incorporation into recipes but less desirable for direct consumption. The proliferation of such products complicates consumer perceptions and risks diluting established standards.</p><p>Moreover, the expansion of matcha production raises questions about environmental sustainability and labor practices. Intensive cultivation methods may lead to soil degradation if not managed responsibly, while increased demand places pressure on small-scale farmers. In response, certain producers have adopted organic certification and equitable trade frameworks. However, these initiatives are not yet universal, and their long-term efficacy remains to be seen.</p><p>In essence, matcha occupies a unique intersection between tradition and modernity. Its evolution from a monastic aid to a global commodity illustrates the dynamic interplay between cultural preservation and commercial adaptation. Understanding matcha, therefore, requires not only an appreciation of its sensory qualities but also a critical awareness of the historical and socio-economic forces that continue to shape its trajectory.</p>" },
+                { type: "mcq", id: 71, question: "71. What is implied about the development of matcha in China?", options: { A: "It was fully developed during the Tang Dynasty.", B: "It was abandoned before reaching Japan.", C: "It evolved through multiple stages before transmission.", D: "It was identical to modern matcha." }, correctAnswer: "C", explanation: "Đáp án C. Khởi nguyên từ thời nhà Đường, sau đó phát triển dạng bột ở thời nhà Tống trước khi truyền sang Nhật Bản -> Trải qua nhiều giai đoạn." },
+                { type: "mcq", id: 72, question: "72. What is the primary purpose of shading tea bushes before harvesting matcha leaves?", options: { A: "To modify the plant's biochemical composition, enhancing amino acid levels", B: "To intensify bitterness for culinary applications", C: "To reduce production costs and speed up harvesting", D: "To prevent the leaves from growing beyond a certain size" }, correctAnswer: "A", explanation: "Đáp án A. Thông tin ở đoạn 6: 'shaded for several weeks, a process that increases chlorophyll production while simultaneously elevating amino acid levels'." },
+                { type: "mcq", id: 73, question: "73. What best describes the author's overall attitude toward matcha in the passage?", options: { A: "Enthusiastic endorsement of its global commercialization", B: "Rejection of modern adaptations in favor of historical purity", C: "Balanced analysis combining appreciation with critical caution", D: "Neutral scientific reporting without cultural interpretation" }, correctAnswer: "C", explanation: "Đáp án C. Tác giả phân tích cân bằng: vừa đánh giá cao lịch sử, vừa cảnh báo về thương mại hóa (commodification)." },
+                { type: "mcq", id: 74, question: "74. TRUE/FALSE/NOT GIVEN: Matcha differs from regular tea infusions because the whole tea leaf is consumed rather than steeped and discarded.", options: { TRUE: "TRUE", FALSE: "FALSE", NOT_GIVEN: "NOT GIVEN" }, correctAnswer: "TRUE", explanation: "Đáp án: TRUE. Thông tin đoạn 1: 'Unlike conventional infusions... matcha entails the ingestion of the entire leaf...'." },
+                { type: "mcq", id: 75, question: "75. TRUE/FALSE/NOT GIVEN: Eisai believed that matcha should only be used for improving physical health, not for mental discipline.", options: { TRUE: "TRUE", FALSE: "FALSE", NOT_GIVEN: "NOT GIVEN" }, correctAnswer: "FALSE", explanation: "Đáp án: FALSE. Đoạn 2 nói ngược lại: 'Eisai's writings emphasized not merely the physiological effects... but also its capacity to cultivate mental discipline'." },
+                { type: "mcq", id: 76, question: "76. TRUE/FALSE/NOT GIVEN: The widespread modern image of matcha as a health trend tends to simplify its deeper historical and cultural background.", options: { TRUE: "TRUE", FALSE: "FALSE", NOT_GIVEN: "NOT GIVEN" }, correctAnswer: "TRUE", explanation: "Đáp án: TRUE. Đoạn 1: 'modern interpretations obscure its complex historical trajectory and cultural specificity'." },
+                { type: "mcq", id: 77, question: "77. TRUE/FALSE/NOT GIVEN: The Japanese tea ceremony requires participants to follow strict procedures, but personal interpretation of gestures is discouraged.", options: { TRUE: "TRUE", FALSE: "FALSE", NOT_GIVEN: "NOT GIVEN" }, correctAnswer: "NOT_GIVEN", explanation: "Đáp án: NOT GIVEN. Bài đọc không đề cập việc có cấm giải thích/diễn giải cá nhân hay không." },
+                { type: "mcq", id: 78, question: "78. TRUE/FALSE/NOT GIVEN: Although some producers have introduced sustainable farming and fair trade practices, there is no clear evidence yet of their lasting success.", options: { TRUE: "TRUE", FALSE: "FALSE", NOT_GIVEN: "NOT GIVEN" }, correctAnswer: "TRUE", explanation: "Đáp án: TRUE. Đoạn 8: 'However, these initiatives are not yet universal, and their long-term efficacy remains to be seen'." },
+                { type: "fill", id: 79, question: "79. Complete the sentence (ONE WORD): High-quality matcha is produced from leaves known as (79) ______", correctAnswer: "tencha", explanation: "Đáp án: tencha. Lấy từ thông tin đoạn 6." },
+                { type: "fill", id: 80, question: "80. Complete the sentence (ONE WORD): However, increasing demand has led to concerns about (80) ______ and sustainability.", correctAnswer: "commodification", explanation: "Đáp án: commodification (hoặc authenticity). Lấy từ thông tin đoạn 7." },
+                
+                { type: "title", text: "III. WRITING (30 points) - Part 1: Complete the second sentence" },
+                { type: "fill", id: 81, question: "81. Many young people probably feel isolated because they spend too much time online.\n→ It is ________________________________", correctAnswer: "likely that many young people feel isolated because they spend too much time online", explanation: "Đáp án gợi ý: likely/probable that many young people feel isolated because they spend too much time online." },
+                { type: "fill", id: 82, question: "82. The corporation made a mistake by ignoring the warnings about air pollution.\n→ The corporation shouldn't ________________________________", correctAnswer: "have ignored the warnings about air pollution", explanation: "Đáp án: have ignored the warnings about air pollution." },
+                { type: "fill", id: 83, question: "83. I will support any decision the community makes about protecting the local park.\n→ Whatever ________________________________", correctAnswer: "decision the community makes about protecting the local park, I will support it", explanation: "Đáp án: decision the community makes about protecting the local park, I will support it." },
+                { type: "fill", id: 84, question: "84. They are determined to continue the charity campaign even if they receive little financial support.\n→ Regardless ________________________________", correctAnswer: "of receiving little financial support, they are determined to continue the charity campaign", explanation: "Đáp án: of receiving little financial support, they are determined to continue the charity campaign." },
+                { type: "fill", id: 85, question: "85. You chose to speak honestly with your parents about your academic difficulties, which was a very responsible thing to do.\n→ You were ________________________________", correctAnswer: "very responsible to speak honestly with your parents about your academic difficulties", explanation: "Đáp án: very responsible to speak honestly with your parents about your academic difficulties." },
+                { type: "title", text: "Part 2: Complete the second sentence using the word given (3-5 words)" },
+                { type: "fill", id: 86, question: "86. People believe that social media has greatly changed the way teenagers communicate. (supposed)\n→ Social media ________________________________ changed the way teenagers communicate.", correctAnswer: "is supposed to have greatly", explanation: "Đáp án: is supposed to have greatly." },
+                { type: "fill", id: 87, question: "87. I don't think you should complain so much about the new school regulations. (rather)\n→ I'd ________________________________ so much about the new school regulations.", correctAnswer: "rather you didn't complain", explanation: "Đáp án: rather you didn't complain." },
+                { type: "fill", id: 88, question: "88. Several parents came to ask about the new education policy while you were away. (during)\n→ During ________________________________ to ask about the new education policy.", correctAnswer: "your absence several parents came", explanation: "Đáp án: your absence several parents came." },
+                { type: "fill", id: 89, question: "89. I think she is the person responsible for organizing the charity event. (appears)\n→ She ________________________________ responsible for organizing the charity event.", correctAnswer: "appears to be the person", explanation: "Đáp án: appears to be the person." },
+                { type: "fill", id: 90, question: "90. The school bought far more computers than were necessary for the language laboratory. (needn't)\n→ The school ________________________________ computers for the language laboratory.", correctAnswer: "needn't have bought so many", explanation: "Đáp án: needn't have bought so many." },
+                { type: "title", text: "Part 3: Essay Writing" },
+                { type: "info", text: "<strong>📝 Hướng dẫn:</strong> Viết một bài luận ngắn trình bày quan điểm của cậu theo yêu cầu đề bài. Bài viết sẽ được gửi thẳng về hòm thư của giáo viên nhé! 🐚" },
+                { type: "essay", id: 91, question: "Write an essay (about 200-250 words) discussing the benefits and drawbacks of using social media among teenagers." }
+            ]
+        },
+        {
+            id: "exam_bacninh_2026",
+            title: "Đề thi vào 10 chuyên Bắc Ninh 2026",
+            data: [
+                { type: "title", text: "PART TWO: LEXICO-GRAMMAR (20 POINTS) - Part 1" },
+                { type: "info", text: "<strong>I. Write the letter A, B, C or D on your answer sheet to indicate the correct answer to each of the following questions. (10 pts.)</strong>" },
+                { type: "mcq", id: 101, question: "1. The car is suffering engine failure. It is imperative that its engine _______", options: { A: "is completely checked", B: "were completely checked", C: "be completely checked", D: "had been completely checked" }, correctAnswer: "C", explanation: "Đáp án C. Cấu trúc bàng thái cách (Subjunctive) với 'It is imperative that + S + (should) + V-inf'. Động từ ở dạng bị động nên dùng 'be completely checked'." },
+                { type: "mcq", id: 102, question: "2. The property encompassed about eighty thousand acres, _______", options: { A: "is seven times the area of Manhattan Island", B: "seven times the area of Manhattan Island", C: "the area of Manhattan Island seven times", D: "the area of seven times Manhattan Island" }, correctAnswer: "B", explanation: "Đáp án B. Đây là cụm danh từ đồng vị (appositive) bổ sung ý nghĩa cho 'eighty thousand acres', hoặc có thể hiểu là mệnh đề quan hệ rút gọn (which is seven times...)." },
+                { type: "mcq", id: 103, question: "3. Having been degraded by years of industrial pollution. _______", options: { A: "an environmental restoration program now focuses on the coastal wetlands", B: "focus by environmental restoration program now remains on the coastal wetlands", C: "the coastal wetlands are now the focus of an environmental restoration program", D: "the coastal wetlands are now being focused on an environmental restoration program" }, correctAnswer: "C", explanation: "Đáp án C. Sự hòa hợp chủ ngữ ở mệnh đề phân từ: Chủ ngữ của vế sau phải là đối tượng chịu tác động của việc 'degraded by years of industrial pollution' (bị suy thoái do ô nhiễm), do đó 'the coastal wetlands' (vùng đất ngập nước ven biển) làm chủ ngữ là chính xác nhất." },
+                { type: "mcq", id: 104, question: "4. Changes in temperature and precipitation can negatively affect breeding habits, alter migration routes, and _______ the delicate balance between predators and preys.", options: { A: "manage", B: "disturb", C: "sustain", D: "redress" }, correctAnswer: "B", explanation: "Đáp án B. 'disturb' (làm xáo trộn, làm mất). Phù hợp với ngữ cảnh phá vỡ sự cân bằng mong manh (delicate balance) giữa thú săn mồi và con mồi." },
+                { type: "mcq", id: 105, question: "5. For mountain-climbing, a really good sleeping-bag is _______.", options: { A: "attainable", B: "verifiable", C: "undeniable", D: "indispensable" }, correctAnswer: "D", explanation: "Đáp án D. 'indispensable' (không thể thiếu, vô cùng quan trọng). Túi ngủ tốt là vật dụng không thể thiếu khi leo núi." },
+                { type: "mcq", id: 106, question: "6. The house _______ a commanding position at the top of the valley.", options: { A: "indicates", B: "occupies", C: "illustrates", D: "determines" }, correctAnswer: "B", explanation: "Đáp án B. Collocation: 'occupy a commanding position' (nằm ở vị trí đắc địa, có tầm nhìn bao quát)." },
+                { type: "mcq", id: 107, question: "7. _______ such as a company car or stock options, I would have considered applying for the position.", options: { A: "Should the company provide fringe benefits", B: "But for the company's fringe benefits", C: "If the company didn't provide fringe benefits", D: "Had the company provided fringe benefits" }, correctAnswer: "D", explanation: "Đáp án D. Đảo ngữ của câu điều kiện loại 3: 'Had + S + Vp2'. Ngữ cảnh: Nếu công ty cung cấp các phúc lợi phụ..., tôi đã cân nhắc ứng tuyển." },
+                { type: "mcq", id: 108, question: "8. _______ has forced many schools to change their cafeteria menu.", options: { A: "That most students prefer buying sugary snacks instead of healthy meals", B: "What most students prefer buying sugary snacks instead of healthy meals", C: "Fact of most students prefer buying sugary snacks instead of healthy meals", D: "Most students prefer buying sugary snacks instead of healthy meals" }, correctAnswer: "A", explanation: "Đáp án A. Mệnh đề danh ngữ bắt đầu bằng 'That + S + V' đóng vai trò làm chủ ngữ số ít cho động từ 'has forced' (Việc phần lớn học sinh thích mua đồ ăn vặt có đường...)." },
+                { type: "mcq", id: 109, question: "9. There was a power failure, _______ the whole computer system to shut down.", options: { A: "caused", B: "to cause", C: "causing", D: "causes" }, correctAnswer: "C", explanation: "Đáp án C. Rút gọn mệnh đề quan hệ mang nghĩa chủ động (which caused -> causing), thay thế cho toàn bộ sự việc phía trước." },
+                { type: "mcq", id: 110, question: "10. The use of robots has _______ boring low-paid factory jobs.", options: { A: "done away with", B: "put down for", C: "passed on to", D: "made up for" }, correctAnswer: "A", explanation: "Đáp án A. Phrasal verb 'do away with' = eliminate/abolish (loại bỏ, xóa bỏ)." },
+                { type: "mcq", id: 111, question: "11. It is claimed that the economy is improving, but this survey suggests _______.", options: { A: "certainly", B: "seriously", C: "otherwise", D: "nonetheless" }, correctAnswer: "C", explanation: "Đáp án C. 'suggest otherwise' (cho thấy điều ngược lại). Cuộc khảo sát cho thấy nền kinh tế không hề cải thiện." },
+                { type: "mcq", id: 112, question: "12. It is common knowledge that exams are done under strict time _______.", options: { A: "processes", B: "boundaries", C: "signals", D: "constraints" }, correctAnswer: "D", explanation: "Đáp án D. Collocation: 'time constraints' (sự giới hạn, áp lực về thời gian)." },
+                { type: "mcq", id: 113, question: "13. When treating any health problem, it's always important to consider the _______ causes.", options: { A: "underlying", B: "deserving", C: "worthwhile", D: "sufficient" }, correctAnswer: "A", explanation: "Đáp án A. Collocation: 'underlying causes' (nguyên nhân gốc rễ, sâu xa)." },
+                { type: "mcq", id: 114, question: "14. The arguments about who should be _______ to vote brought registration to a halt.", options: { A: "respectable", B: "eligible", C: "admissible", D: "reasonable" }, correctAnswer: "B", explanation: "Đáp án B. 'eligible to do sth' (đủ tư cách, đủ điều kiện để làm gì - ở đây là đủ điều kiện bỏ phiếu)." },
+                { type: "mcq", id: 115, question: "15. The medical equipment of the hospital is a bit _______. This reduces the quality of disease diagnosis and treatment.", options: { A: "ahead of its time", B: "high and low", C: "behind the times", D: "like nothing on earth" }, correctAnswer: "C", explanation: "Đáp án C. Idiom 'behind the times' (lạc hậu, lỗi thời). Các thiết bị y tế đã cũ làm giảm chất lượng chẩn đoán." },
+                { type: "mcq", id: 116, question: "16. By definition, hyperactive children _______ to keep still or be quiet for very long.", options: { A: "find it difficult", B: "find it to be difficult", C: "find them difficult", D: "find difficult" }, correctAnswer: "A", explanation: "Đáp án A. Cấu trúc 'find + it + adj + to V' (cảm thấy như thế nào khi làm gì)." },
+                { type: "mcq", id: 117, question: "17. The government has _______ plans for new legislation to protect disadvantaged children.", options: { A: "addressed", B: "disrupted", C: "reflected", D: "unveiled" }, correctAnswer: "D", explanation: "Đáp án D. 'unveil plans' (tiết lộ, công bố kế hoạch). Chính phủ đã công bố kế hoạch ban hành luật mới." },
+                { type: "mcq", id: 118, question: "18. Since our research so far has not produced any answers to this problem, we need to adopt a different _______ to it.", options: { A: "approach", B: "criterion", C: "mannerism", D: "procedure" }, correctAnswer: "A", explanation: "Đáp án A. Collocation: 'adopt a different approach to sth' (áp dụng một phương pháp tiếp cận khác)." },
+                { type: "mcq", id: 119, question: "19. Two friends are talking about food production.\nFreda: I feel that the term 'organic production' is being abused.\nMandy: _______. Many manufacturers still use harmful chemicals in the production of the so-called 'organic food'.", options: { A: "I don't think so", B: "I couldn't agree more", C: "Feel free to ask", D: "I'm not with you" }, correctAnswer: "B", explanation: "Đáp án B. 'I couldn't agree more' (Tôi hoàn toàn đồng ý). Vế sau Mandy giải thích thêm củng cố ý kiến của Freda." },
+                { type: "mcq", id: 120, question: "20. Kayla has helped Julian a lot in his medical research.\nJulian: Thank you very much for your help.\nKayla: _______.", options: { A: "Not at all", B: "Come what may", C: "Be my guest", D: "That figures" }, correctAnswer: "A", explanation: "Đáp án A. 'Not at all' thường dùng để đáp lại lời cảm ơn một cách lịch sự (Không có gì đâu)." },
+                
+                { type: "title", text: "Part 2 - Word Formation" },
+                { type: "info", text: "<strong>II. Complete the sentence in each of the following questions by giving the correct form of the given word. (5 pts.)</strong>" },
+                { type: "fill", id: 121, question: "1. Larry, with _______ generosity, invited everyone back to his house. (CHARACTER)", correctAnswer: "characteristic", explanation: "Đáp án: characteristic. Cần tính từ đứng trước danh từ 'generosity' (sự hào phóng mang tính đặc trưng của Larry)." },
+                { type: "fill", id: 122, question: "2. We appreciate your _______ to our administration and your help at a time when needed. (DEDICATE)", correctAnswer: "dedication", explanation: "Đáp án: dedication. Đứng sau tính từ sở hữu 'your' cần một danh từ (sự cống hiến)." },
+                { type: "fill", id: 123, question: "3. The firefighters wore respirators to help them _______ in the smoke-filled house. (BREATH)", correctAnswer: "breathe", explanation: "Đáp án: breathe. Đứng sau 'help them' cần động từ nguyên thể (hít thở)." },
+                { type: "fill", id: 124, question: "4. The universities could coordinate _______ learning packages for their graduates in various hospitals. (DISTANT)", correctAnswer: "distance", explanation: "Đáp án: distance. Dùng trong cụm danh từ ghép 'distance learning' (học từ xa)." },
+                { type: "fill", id: 125, question: "5. All outstanding bills will be paid by the previous _______. (OCCUPY)", correctAnswer: "occupant", explanation: "Đáp án: occupant (hoặc occupants). Cần danh từ chỉ người (người thuê trước đây)." },
+                { type: "fill", id: 126, question: "6. 'You've only got yourself to blame,' she said _______. (SYMPATHY)", correctAnswer: "unsympathetically", explanation: "Đáp án: unsympathetically. Cần trạng từ bổ nghĩa cho động từ 'said'. Ngữ nghĩa câu cho thấy cô ấy nói một cách vô tâm/không cảm thông." },
+                { type: "fill", id: 127, question: "7. He didn't drink because he was the _______ driver who drove the others home safely. (DESIGNATE)", correctAnswer: "designated", explanation: "Đáp án: designated. Cụm từ quen thuộc 'designated driver' (người được chỉ định lái xe, thường không uống rượu để đưa mọi người về an toàn)." },
+                { type: "fill", id: 128, question: "8. Medical _______ are seen as having the required expert knowledge permitting them legally to prescribe drugs... (PRACTISE)", correctAnswer: "practitioners", explanation: "Đáp án: practitioners. Cụm từ 'medical practitioners' (người hành nghề y/bác sĩ)." },
+                { type: "fill", id: 129, question: "9. Perhaps, in a science as complex as _______, computer models are imperfect. (CLIMATE)", correctAnswer: "climatology", explanation: "Đáp án: climatology. Đứng sau 'complex as' cần một danh từ chỉ môn khoa học (Khí hậu học)." },
+                { type: "fill", id: 130, question: "10. Constant correction by a teacher is often _______, as the student may become afraid to speak at all. (PRODUCE)", correctAnswer: "counterproductive", explanation: "Đáp án: counterproductive. Mang nghĩa 'phản tác dụng' do học sinh sẽ trở nên sợ nói tiếng Anh." },
+                
+                { type: "title", text: "Part 3 - Error Identification" },
+                { type: "info", text: "<strong>III. There are FIVE mistakes in the following text. Identify the mistakes and give the corrections. An example has been done for you. (5 pts.)</strong>" },
+                { 
+                    type: "passage", 
+                    text: `<div style="font-family: 'Times New Roman', Times, serif; font-size: 1.15em; line-height: 1.8; padding: 25px; background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: inset 0 0 10px rgba(0,0,0,0.02); color: #000;">
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(1)</span><div>We often worry about lying wake in the middle of the night but it can be good for you.</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(2)</span><div>Indications from both science and history suggest that the eight-hours sleep may not be</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(3)</span><div>natural or inborn for humans. In the early 1990s, psychiatrist Thomas Wehr conducted a</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(4)</span><div>research in which Wehr kept a group of people in a darkened room for 14 hours a day for a</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(5)</span><div>month. It took some time for their sleep regulate, but by the fourth week the subjects had</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(6)</span><div>settled into a very distinct sleep pattern. Firstly, they slept four hours, then woke for one or</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(7)</span><div>two hours before falling into a third four-hour sleep. Sleep scientists were impressed by the</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(8)</span><div>implications of the study.</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(9)</span><div>Sleep psychologist, Gregg Jacobs, says that the idea that we must sleep for an extended</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(10)</span><div>period of time can change. 'It makes people who wake up in the night anxious, as this</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(11)</span><div>anxiety can itself discourage sleep and is likely to affect waking life, too, Jacobs says.</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(12)</span><div>Russell Foster, a professor of circadian (body clock) neuroscience at Oxford University in</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(13)</span><div>the UK, shares this point of view. 'Over 30% of the medical problems that doctors face with</div></div>
+                        <div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(14)</span><div>stem directly or indirectly from sleep,' Foster says.</div></div>
+                        <div style="margin-top: 20px; font-weight: bold; color: var(--primary-dark);">Your answers: (0) line 2: eight-hours &rarr; eight-hour</div>
+                    </div>` 
+                },
+                { type: "fill", id: 131, question: "1. Line 1 (Lỗi: wake) &rarr; Sửa thành:", correctAnswer: "awake", explanation: "Đáp án: awake. Cụm từ chính xác là 'lie awake' (nằm trằn trọc, thức giấc)." },
+                { type: "fill", id: 132, question: "2. Line 4 (Lỗi: a research) &rarr; Sửa thành:", correctAnswer: "research", explanation: "Đáp án: research (hoặc a study). 'Research' là danh từ không đếm được nên không dùng mạo từ 'a' phía trước." },
+                { type: "fill", id: 133, question: "3. Line 5 (Lỗi: regulate) &rarr; Sửa thành:", correctAnswer: "to regulate", explanation: "Đáp án: to regulate. Cấu trúc 'take time for sth to do sth' (mất thời gian để làm gì)." },
+                { type: "fill", id: 134, question: "4. Line 10 (Lỗi: as) &rarr; Sửa thành:", correctAnswer: "and", explanation: "Đáp án: and (hoặc since/because tuỳ văn cảnh sâu, nhưng 'and' liên kết logic nhân quả tự nhiên hơn ở đây - nó làm mọi người lo âu VÀ sự lo âu này...)." },
+                { type: "fill", id: 135, question: "5. Line 13 (Lỗi: face with) &rarr; Sửa thành:", correctAnswer: "face", explanation: "Đáp án: face. Động từ 'face' (đối mặt) khi dùng trực tiếp với tân ngữ thì không đi kèm giới từ 'with' trừ dạng bị động (be faced with)." },
+            { type: "title", text: "PART THREE: READING (35 POINTS)" },
+                
+                // --- BÀI ĐỌC 1 ---
+                { type: "info", text: "<strong>I. Read the text below and fill in each gap with ONE suitable word. (5 pts.)</strong>" },
+                { 
+                    type: "passage", 
+                    text: "<div style='font-size: 1.1em; line-height: 1.8; color: #0d4f66; text-align: justify;'><p>Recent research has revealed that a third of people in Britain have not met their next-door neighbors, and those who know each other barely speak. 'The sight of neighbors gossiping over garden fences and in the street <b>(1) _______</b> common in the 1950s', said Dr. Carl Chinn, an expert on local communities. Now, however, longer hours spent working at the office, together with the Internet and satellite television, are eroding neighborhood ties. 'Poor neighborhoods <b>(2) _______</b> had strong kinship, but now prosperity buys privacy,' said Dr. Carl.</p><p>Professor John Locke, a social scientist at Cambridge University, has analyzed a large number of surveys. He found that in America and Britain, the amount of time spent in <b>(3) _______</b> activity is decreasing. A third of people said they never spoke to their neighbors at all. Andrew Mayer, a strategy consultant, rents a large apartment in West London, with two flatmates. 'We have a family of teachers upstairs and lawyers below, but our contact comes via letters relating to the communal facilities or complaints <b>(4) _______</b> we've not put out our bin bags properly,' said Mayer.</p><p>The breakdown of communities can have serious effects. Concerned at the rise in burglaries and acts of vandalism, the police have relaunched crime <b>(5) _______</b> schemes such as Neighborhood Watch, calling on people who live in the same neighborhood to keep an eye on each other's houses and report everything they see which is unusual.</p></div>" 
+                },
+                { type: "fill", id: 301, question: "1. (Điền 1 từ vào chỗ trống số 1)", correctAnswer: "was", explanation: "Đáp án: was. Động từ to-be chia ở thì quá khứ đơn vì chủ ngữ 'The sight' số ít và có dấu hiệu thời gian 'in the 1950s'." },
+                { type: "fill", id: 302, question: "2. (Điền 1 từ vào chỗ trống số 2)", correctAnswer: "once", explanation: "Đáp án: once / formerly / previously. Ngữ cảnh tương phản với 'but now' (nhưng bây giờ), thể hiện việc ngày xưa từng có tình làng nghĩa xóm bền chặt." },
+                { type: "fill", id: 303, question: "3. (Điền 1 từ vào chỗ trống số 3)", correctAnswer: "social", explanation: "Đáp án: social. Cụm từ 'social activity' (hoạt động xã hội/giao tiếp). Dấu hiệu là ông John Locke là một 'social scientist'." },
+                { type: "fill", id: 304, question: "4. (Điền 1 từ vào chỗ trống số 4)", correctAnswer: "that", explanation: "Đáp án: that. Dùng để mở đầu một mệnh đề danh ngữ giải thích cho danh từ 'complaints' (lời phàn nàn RẰNG chúng tôi chưa vứt rác đúng cách)." },
+                { type: "fill", id: 305, question: "5. (Điền 1 từ vào chỗ trống số 5)", correctAnswer: "prevention", explanation: "Đáp án: prevention. Cụm danh từ 'crime prevention schemes' (các chương trình phòng chống tội phạm)." },
+
+                // --- BÀI ĐỌC 2 ---
+                { type: "info", text: "<strong>II. Read the following passage and write the letter A, B, C, or D on your answer sheet to indicate the option that best fits each of the numbered blanks. (10 pts.)</strong>" },
+                { 
+                    type: "passage", 
+                    text: "<div style='font-size: 1.1em; line-height: 1.8; color: #0d4f66; text-align: justify;'><p>Academic success is frequently considered as the combination of academic performance, persistence, and satisfaction. Of these, performance is often treated as the <b>(1) _______</b> indicator, primarily due to its obvious objectivity and gaining of quantification through grades and standardized assessments. However, such reliance may risk privileging <b>(2) _______</b> outcomes over less visible, yet equally consequential, dimensions. While performance can signal attainment, it does not necessarily capture the conditions <b>(3) _______</b> which that attainment is produced.</p><p>Increasingly, <b>(4) _______</b> has shifted toward the underlying factors that shape academic achievements. Although strong performance may appear to reflect competence or effective learning strategies, it can also coexist with less <b>(5) _______</b> challenges, including chronic stress or disengagement. These factors, while not immediately observable, may exert a delayed influence on persistence and satisfaction. For instance, students who initially achieve high results may nonetheless experience <b>(6) _______</b> motivation over time, suggesting that performance alone is an insufficient substitute for long-term academic stability. Importantly, the absence of visible difficulty should not be interpreted as the absence of strain.</p><p>In response, institutions have implemented a range of interventions <b>(7) _______</b> to mitigate the adverse effects associated with these hidden pressures. Such measures often include psychological support services, structured academic guidance, and initiatives aimed at <b>(8) _______</b> social integration. Evidence suggests that these strategies can enhance student engagement, their effectiveness is, <b>(9) _______</b>, not uniform across contexts. In some cases, improvements in retention are evident, yet the extent to which these gains can be <b>(10) _______</b> solely to institutional support remains open to interpretation. This raises questions about whether such interventions address root causes or merely alleviate symptoms.</p></div>" 
+                },
+                { type: "mcq", id: 306, question: "1. Choose the correct answer for blank (1):", options: { A: "unreliable", B: "predominant", C: "contributory", D: "irrelevant" }, correctAnswer: "B", explanation: "Đáp án B. predominant (chiếm ưu thế). Thành tích học tập thường được coi là chỉ số chính/chiếm ưu thế nhất." },
+                { type: "mcq", id: 307, question: "2. Choose the correct answer for blank (2):", options: { A: "measurable", B: "inevitable", C: "statistical", D: "unintended" }, correctAnswer: "A", explanation: "Đáp án A. measurable (có thể đo lường). Ngữ cảnh đang nói về điểm số là những kết quả có thể đo lường được (quantification)." },
+                { type: "mcq", id: 308, question: "3. Choose the correct answer for blank (3):", options: { A: "behind", B: "within", C: "from", D: "under" }, correctAnswer: "D", explanation: "Đáp án D. under. Dùng trong cụm 'under conditions' -> 'under which' (trong những điều kiện mà thành tựu đó được tạo ra)." },
+                { type: "mcq", id: 309, question: "4. Choose the correct answer for blank (4):", options: { A: "confusion", B: "attitude", C: "perspective", D: "attention" }, correctAnswer: "D", explanation: "Đáp án D. attention. Sự chú ý (attention) ngày càng được chuyển sang các yếu tố nền tảng (underlying factors)." },
+                { type: "mcq", id: 310, question: "5. Choose the correct answer for blank (5):", options: { A: "serious", B: "daunting", C: "apparent", D: "continuous" }, correctAnswer: "C", explanation: "Đáp án C. apparent (rõ ràng). Trái ngược với biểu hiện điểm số tốt ra bên ngoài là những khó khăn ít bộc lộ rõ ràng hơn (less apparent)." },
+                { type: "mcq", id: 311, question: "6. Choose the correct answer for blank (6):", options: { A: "consistent", B: "individual", C: "increasing", D: "diminishing" }, correctAnswer: "D", explanation: "Đáp án D. diminishing (giảm sút). Học sinh đạt điểm cao lúc đầu nhưng dần dần có thể trải qua sự sụt giảm động lực." },
+                { type: "mcq", id: 312, question: "7. Choose the correct answer for blank (7):", options: { A: "intended", B: "intending", C: "intend", D: "to intend" }, correctAnswer: "A", explanation: "Đáp án A. intended. Rút gọn mệnh đề quan hệ dạng bị động (which are intended to mitigate... - được nhằm mục đích giảm nhẹ...)." },
+                { type: "mcq", id: 313, question: "8. Choose the correct answer for blank (8):", options: { A: "worsening", B: "governing", C: "fostering", D: "requiring" }, correctAnswer: "C", explanation: "Đáp án C. fostering (thúc đẩy, bồi dưỡng). Các sáng kiến nhằm mục đích thúc đẩy sự hòa nhập xã hội." },
+                { type: "mcq", id: 314, question: "9. Choose the correct answer for blank (9):", options: { A: "therefore", B: "however", C: "thereby", D: "although" }, correctAnswer: "B", explanation: "Đáp án B. however (tuy nhiên). Đứng giữa hai dấu phẩy để thể hiện sự tương phản giữa việc các chiến lược này có hiệu quả nhưng lại không đồng đều." },
+                { type: "mcq", id: 315, question: "10. Choose the correct answer for blank (10):", options: { A: "attributed", B: "contributed", C: "allocated", D: "adjusted" }, correctAnswer: "A", explanation: "Đáp án A. attributed. Cấu trúc 'be attributed to' (được quy cho/được cho là nhờ vào)." },
+
+		// --- BÀI ĐỌC 3 ---
+                { type: "info", text: "<strong>III. Read the following passage and write the letter A, B, C, or D on your answer sheet to indicate the correct answer to each of the following questions. (10 pts.)</strong>" },
+                { 
+                    type: "passage", 
+                    text: "<div style='font-size: 1.1em; line-height: 1.8; color: #0d4f66; text-align: justify;'><p><b>[I]</b> The global-pandemic of 2020 served as an unprecedented catalyst for the education sector, forcing an abrupt transition from traditional brick-and-mortar classrooms to virtual learning environments. <b>[II]</b> Educators and institutions were compelled to proceed with curricula despite the absence of physical proximity, leading to the rapid development of e-learning platforms. <b>[III]</b> Although the suddenness of this transition presented significant logistical obstacles, it also highlighted the limitations of conventional schooling and the vast potential of digital integration in the 21st century. <b>[IV]</b></p><p>One of the primary advantages of e-learning lies in its unparalleled efficiency and personalization. Unlike the \"one-size-fits-all\" approach often found in traditional settings, digital platforms allow for a more student-centered experience. Through Learning Management Systems (LMS), educators can integrate diverse media such as podcasts, interactive simulations, and real-time debates to cater to various learning styles. Furthermore, the availability of precise LMS metrics enables teachers to monitor students' performance with surgical accuracy, allowing for timely interventions. For instance, introverted students, who might feel marginalized in a loud classroom, often find their voice in online discussion forums, where the pressure of immediate verbal response is mitigated.</p><p>Accessibility and flexibility further solidify e-learning's position as a viable alternative to higher education. For adult learners who want to balance professional responsibilities with academic pursuits, the ability to study at one's own pace is indispensable. Research indicates that this autonomy can lead to a 25% to 60% increase in information retention rates, as students can revisit complex lectures until mastery is achieved. Moreover, the rise of Massive Open Online Courses (MOOCs), such as Coursera, has democratized elite education. These platforms provide a bridge for students in developing regions to access certifications from world-renowned corporations like Google, effectively narrowing the global skill gap. This democratization allows a student in a rural village to learn the same concepts as one in a major metropolis.</p><p>Despite its clear benefits, <u>the future of e-learning is not without its skeptics</u>. Critics argue that the lack of face-to-face interaction may diminish the development of essential social skills and collaborative emotional intelligence. However, the consensus among experts suggests that digital learning is no longer a secondary tool but a core component of modern instruction. Rather than resisting this evolution, society must focus on perfecting these tools to ensure they are equitable and inclusive. The goal is not to replace the human element of teaching, but to augment it through technology, creating a future where high-quality education is a universal right rather than a geographic privilege.</p></div>" 
+                },
+                { type: "mcq", id: 316, question: "1. Which of the following can serve as the title of the passage?", options: { A: "Drawbacks of Traditional Schooling", B: "A Detailed Analysis of E-learning", C: "Educational Platforms in the Pandemic", D: "Benefits and Potential of E-learning" }, correctAnswer: "D", explanation: "Đáp án D. Bài văn tập trung vào việc mô tả những lợi thế (advantages, benefits) và tiềm năng to lớn (vast potential) của e-learning trong tương lai." },
+                { type: "mcq", id: 317, question: "2. Where in the passage does the following sentence best fit?\n<i>'While this shift was initially viewed as a temporary emergency measure, it has fundamentally reshaped the way people teach and learn.'</i>", options: { A: "[I]", B: "[II]", C: "[III]", D: "[IV]" }, correctAnswer: "D", explanation: "Đáp án D. Câu này kết nối logic với vế trước đó nói về tiềm năng tích hợp kỹ thuật số, đồng thời mở đầu cho việc phân tích sự thay đổi cơ bản ở các đoạn sau." },
+                { type: "mcq", id: 318, question: "3. The word 'marginalized' in paragraph 2 is closest in meaning to", options: { A: "indifferent", B: "insignificant", C: "indecisive", D: "competent" }, correctAnswer: "B", explanation: "Đáp án B. 'marginalized' có nghĩa là bị gạt ra rìa, bị coi là không quan trọng, tương đồng với 'insignificant' (không đáng kể, không quan trọng)." },
+                { type: "mcq", id: 319, question: "4. The word 'it' in the last paragraph refers to", options: { A: "the future of e-learning", B: "face-to-face interaction", C: "emotional intelligence", D: "human element of teaching" }, correctAnswer: "D", explanation: "Đáp án D. 'The goal is not to replace the human element of teaching, but to augment it...' -> Đại từ 'it' thay thế cho 'human element of teaching'." },
+                { type: "mcq", id: 320, question: "5. Why does the writer mention the situation of introverted students in paragraph 2?", options: { A: "To criticize the setting of traditional schools", B: "To highlight a benefit of e-learning", C: "To prove the need for teachers' intervention", D: "To voice objection to online discussion forums" }, correctAnswer: "B", explanation: "Đáp án B. Tác giả đưa ra ví dụ về học sinh hướng nội để làm nổi bật một lợi ích của e-learning (giúp họ mạnh dạn cất tiếng nói)." },
+                { type: "mcq", id: 321, question: "6. E-learning seems to be the optimal choice for adult learners because", options: { A: "they can attend as many lectures as possible", B: "they can choose suitable learning platforms", C: "they are provided with safer learning settings", D: "they are able to learn at their convenience" }, correctAnswer: "D", explanation: "Đáp án D. Đoạn 3 nhắc đến 'the ability to study at one's own pace' (khả năng học theo nhịp độ/tiện lợi cá nhân)." },
+                { type: "mcq", id: 322, question: "7. According to paragraph 3, e-learning", options: { A: "offers an obvious alternative to home schooling", B: "fosters learners' independence of digital devices", C: "offers equal access to prestigious institutions", D: "is for those with information retention problems" }, correctAnswer: "C", explanation: "Đáp án C. Thông qua các MOOCs, học sinh có thể tiếp cận được giáo dục ưu tú (democratized elite education) và chứng chỉ từ các tổ chức danh tiếng." },
+                { type: "mcq", id: 323, question: "8. Which of the following best paraphrases the underlined sentence in paragraph 4?", options: { A: "There are still concerns about the application of e-learning in the future.", B: "Not a single person is skeptical about the sustainable development of e-learning.", C: "The negative effects e-learning can have on education are inevitable.", D: "It is more and more challenging for educational institutions to apply e-learning." }, correctAnswer: "A", explanation: "Đáp án A. 'not without its skeptics' mang nghĩa là vẫn có những người hoài nghi, lo ngại (concerns) về e-learning." },
+                { type: "mcq", id: 324, question: "9. Which of the following can be inferred from paragraph 4?", options: { A: "With its potential, technology will eventually replace human teachers in the future.", B: "Technology shouldn't be a replacement but a facilitator to human teachers.", C: "Human interaction is the only thing that matters in a high-quality education.", D: "Teachers need to work harder to outperform new technology in the long run." }, correctAnswer: "B", explanation: "Đáp án B. Đoạn cuối nhấn mạnh công nghệ không nhằm mục đích thay thế con người, mà là công cụ để hỗ trợ/tạo điều kiện (facilitator)." },
+                { type: "mcq", id: 325, question: "10. Which of the following is NOT TRUE according to the passage?", options: { A: "Adult learners often find the flexibility of e-learning beneficial for their careers.", B: "Critics are concerned that online learning might hinder social skill development.", C: "Educators can tailor their lessons to the needs of their students.", D: "Educational institutions were willing to adopt online platforms during the pandemic." }, correctAnswer: "D", explanation: "Đáp án D. Bài đọc dùng từ 'forcing an abrupt transition' (bị ép buộc chuyển đổi), chứ không phải họ tự nguyện/sẵn lòng (willing)." },
+
+                // --- BÀI ĐỌC 4 ---
+                { type: "info", text: "<strong>IV. Read the following passage and do the tasks that follow. (10 pts.)</strong>" },
+                { 
+                    type: "passage", 
+                    text: "<div style='font-size: 1.1em; line-height: 1.8; color: #0d4f66; text-align: justify;'><h3>The Paradox of Choice in Modern Consumer Societies</h3><p><strong>A.</strong> In contemporary consumer societies, the expansion of choice is frequently regarded as an unquestionable indicator of progress. Supermarkets now stock hundreds of variations of similar products, while digital platforms allow consumers to browse an almost limitless range of goods and services from across the globe. This abundance is often assumed to enhance personal freedom, enabling individuals to select options that best align with their preferences and values... However, an increasing body of psychological and economic research suggests that the relationship between choice and satisfaction is far more complex than it initially appears, and in some cases may even produce unintended negative consequences for consumers.</p><p><strong>B.</strong> One explanation for this paradox lies in the cognitive demands associated with evaluating numerous alternatives. Each additional option introduces new variables that must be processed, compared, and prioritized. While a small set of choices can be handled with relative ease, a larger assortment may overwhelm an individual's decision-making capacity. As a result, people often experience what researchers describe as \"decision fatigue,\" a condition in which the quality of decisions declines after extended periods of deliberation... In such contexts, individuals may begin to rely on shortcuts or heuristics, which do not always lead to optimal outcomes.</p><p><strong>C.</strong> Beyond the immediate difficulty of making a decision, excessive choice can also influence how individuals feel after a selection has been made. When only a limited number of options are available, people tend to feel more confident that they have made a satisfactory choice. In contrast, when faced with a wide array of alternatives, individuals are more likely to reflect on the possibilities they rejected. This process, commonly referred to as \"counterfactual thinking,\" involves imagining how different choices might have produced better outcomes, thereby reducing satisfaction with the chosen option and increasing feelings of regret, uncertainty, and self-doubt...</p><p><strong>D.</strong> Importantly, the relationship between choice and satisfaction does not follow a simple linear pattern. Increasing the number of options from very few to a moderate level can enhance feelings of autonomy and control. However, once this optimal threshold is exceeded, additional choices begin to have diminishing and eventually negative effects. This inverted relationship highlights the existence of a balance point, beyond which the psychological costs of decision-making outweigh the perceived benefits of having more options. Determining this threshold, however, may vary across individuals...</p><p><strong>E.</strong> The implications of excessive choice extend beyond individual experiences to influence broader patterns of behaviour in modern economies. In markets characterised by intense competition, companies often assume that expanding product lines will attract more consumers and increase overall engagement. Yet empirical studies suggest that an overabundance of options can lead to decision avoidance, where individuals postpone making a choice or abandon the process entirely... In some cases, individuals may even delegate decisions to others simply to avoid the cognitive burden involved.</p><p><strong>F.</strong> Recognising these challenges, some organisations have begun to adopt strategies aimed at simplifying consumer decision-making. Rather than offering an overwhelming number of options, they curate selections that are easier to navigate and compare... These approaches reflect an understanding that freedom of choice is most beneficial when it is accompanied by clarity and support.</p><p><strong>G.</strong> Ultimately, the paradox of choice reveals a fundamental tension within modern economic systems. While technological advancement has made it possible to expand the range of available options, human cognitive capacity remains inherently limited. As a result, the challenge lies not in increasing choice indefinitely, but in designing environments that enable individuals to make effective decisions without becoming overwhelmed...</p></div>" 
+                },
+                { type: "info", text: "<strong>For questions 1-4, match the paragraphs (A-D) with the most suitable headings (i-vi). There are two extra options that you do not need to use.</strong><br>i. The positive correlation between choice and satisfaction<br>ii. How to determine the optimal number of choices<br>iii. The benefits of the abundance of choice<br>iv. The paradox of choice at first glance<br>v. Negative emotions after making decisions<br>vi. Uninformed decisions due to excessive choice" },
+                { type: "dropdown", id: 326, question: "1. Paragraph A", options: ["i", "ii", "iii", "iv", "v", "vi"], correctAnswer: "iv", explanation: "Đoạn A giới thiệu cái nhìn tổng quan ban đầu về nghịch lý của sự lựa chọn: tưởng chừng mang lại tự do nhưng lại ẩn chứa hệ quả tiêu cực." },
+                { type: "dropdown", id: 327, question: "2. Paragraph B", options: ["i", "ii", "iii", "iv", "v", "vi"], correctAnswer: "vi", explanation: "Đoạn B giải thích việc mệt mỏi khi ra quyết định ('decision fatigue') dẫn tới việc dựa vào lối tắt (shortcuts), gây ra các quyết định thiếu sáng suốt (uninformed decisions)." },
+                { type: "dropdown", id: 328, question: "3. Paragraph C", options: ["i", "ii", "iii", "iv", "v", "vi"], correctAnswer: "v", explanation: "Đoạn C mô tả cảm giác hối tiếc, nghi ngờ bản thân (regret, uncertainty, self-doubt) xảy ra sau khi một lựa chọn đã được đưa ra." },
+                { type: "dropdown", id: 329, question: "4. Paragraph D", options: ["i", "ii", "iii", "iv", "v", "vi"], correctAnswer: "ii", explanation: "Đoạn D bàn về điểm cân bằng, ngưỡng tối ưu (optimal threshold/balance point) của việc đưa ra lựa chọn." },
+                { type: "info", text: "<strong>For questions 5-8, decide whether the following statements are True (T), False (F), or Not Given (NG).</strong>" },
+                { type: "mcq", id: 330, question: "5. A significant amount of identical goods are on display at supermarkets to attract customers.", options: { T: "True", F: "False", NG: "Not Given" }, correctAnswer: "F", explanation: "Đáp án: False. Bài đọc viết 'hundreds of variations of similar products' (biến thể của các sản phẩm tương tự), chứ không phải là 'identical goods' (sản phẩm giống hệt nhau)." },
+                { type: "mcq", id: 331, question: "6. One may experience \"decision fatigue\" as he fails to handle a wide variety of choices.", options: { T: "True", F: "False", NG: "Not Given" }, correctAnswer: "T", explanation: "Đáp án: True. Khớp với nội dung đoạn B: 'a larger assortment may overwhelm an individual's decision-making capacity. As a result, people often experience... decision fatigue'." },
+                { type: "mcq", id: 332, question: "7. The final choice is often the least favored of the decision-maker.", options: { T: "True", F: "False", NG: "Not Given" }, correctAnswer: "NG", explanation: "Đáp án: Not Given. Bài đọc không hề khẳng định lựa chọn cuối cùng là lựa chọn ít được yêu thích nhất." },
+                { type: "mcq", id: 333, question: "8. That the number of choices remains stable at all times offers people positive feelings.", options: { T: "True", F: "False", NG: "Not Given" }, correctAnswer: "NG", explanation: "Đáp án: Not Given. Bài đọc không đề cập đến việc giữ số lượng lựa chọn cố định ở mọi thời điểm sẽ đem lại cảm xúc tích cực." },
+                { type: "info", text: "<strong>For questions 9-10, read the summary and fill in each gap with NO MORE THAN THREE WORDS from the passage.</strong><br>Excessive choice has a profound effect on personal experiences as well as patterns of behaviors in different fields. Some individuals tend to delay their decision making, or eliminate this process entirely. Some assign it to others as they do not want to bear the (9) _______. To solve this problem, businesses offer options that customers can (10) _______ at ease." },
+                { type: "fill", id: 334, question: "9. (Điền tối đa 3 từ vào chỗ trống số 9)", correctAnswer: "cognitive burden", explanation: "Đáp án: cognitive burden. Cuối đoạn E có ghi: 'delegate decisions to others simply to avoid the cognitive burden involved'." },
+                { type: "fill", id: 335, question: "10. (Điền tối đa 3 từ vào chỗ trống số 10)", correctAnswer: "navigate and compare", explanation: "Đáp án: navigate and compare. Thông tin nằm ở đoạn F: 'curate selections that are easier to navigate and compare'." },
+
+		{ type: "title", text: "PART FOUR: WRITING (25 POINTS)" },
+                
+                // --- PHẦN VIẾT LẠI CÂU (BẮT ĐẦU BẰNG TỪ CHO SẴN) ---
+                { type: "info", text: "<strong>I. For each of the following questions, complete the second sentence so that it has the same meaning as the given one, beginning with the word(s) provided. (8 pts.)</strong>" },
+                { type: "fill", id: 401, question: "1. When he returned, there was a letter waiting for him.\n→ On his ________________________________", correctAnswer: "return, there was a letter waiting for him", explanation: "Đáp án: return, there was a letter waiting for him. Cấu trúc 'On + tính từ sở hữu + Noun' dùng để thay thế cho mệnh đề trạng ngữ chỉ thời gian." },
+                { type: "fill", id: 402, question: "2. You should try harder in your construction project.\n→ You should put ________________________________", correctAnswer: "more effort into your construction project", explanation: "Đáp án: more effort into your construction project. Collocation 'put effort into something' (đầu tư công sức/nỗ lực vào việc gì)." },
+                { type: "fill", id: 403, question: "3. They are employing drastic measures to prevent violent crime.\n→ With a view ________________________________", correctAnswer: "to preventing violent crime, they are employing drastic measures", explanation: "Đáp án: to preventing violent crime, they are employing drastic measures. Cấu trúc 'With a view to + V-ing' (với mục đích làm gì)." },
+                { type: "fill", id: 404, question: "4. There is no chance that he will win against such an experienced player.\n→ He doesn't stand ________________________________", correctAnswer: "a chance of winning against such an experienced player", explanation: "Đáp án: a chance of winning against such an experienced player. Idiom 'stand a chance of doing sth' (có cơ hội làm gì)." },
+                { type: "fill", id: 405, question: "5. We haven't decided what action to take to minimize pollution from cars.\n→ We have yet ________________________________", correctAnswer: "to decide what action to take to minimize pollution from cars", explanation: "Đáp án: to decide what action to take to minimize pollution from cars. Cấu trúc 'have yet to do sth' = 'haven't done sth' (vẫn chưa làm gì)." },
+                { type: "fill", id: 406, question: "6. He tried his best but he couldn't get the incident out of his mind.\n→ Try ________________________________", correctAnswer: "as he might, he couldn't get the incident out of his mind", explanation: "Đáp án: as he might, he couldn't get the incident out of his mind. Cấu trúc đảo ngữ nhượng bộ: 'Try as + S + might/may, S + V' (Dù cố gắng đến đâu...)." },
+                { type: "fill", id: 407, question: "7. You shouldn't approach the man, in any circumstances.\n→ Under ________________________________", correctAnswer: "no circumstances should you approach the man", explanation: "Đáp án: no circumstances should you approach the man. Đảo ngữ với 'Under no circumstances' (Trong bất kỳ hoàn cảnh nào cũng không)." },
+                { type: "fill", id: 408, question: "8. Perhaps the search for the missing men was conducted in poor weather conditions.\n→ The search for the missing men ________________________________", correctAnswer: "might have been conducted in poor weather conditions", explanation: "Đáp án: might have been conducted in poor weather conditions (hoặc may have been). Cấu trúc 'might/may + have + Vp2' suy đoán một khả năng trong quá khứ." },
+
+                // --- PHẦN VIẾT LẠI CÂU (DÙNG TỪ CHO SẴN) ---
+                { type: "info", text: "<strong>II. For each of the following questions, complete the second sentence so that it has the same meaning as the given one, using the word in capital. Do not change the given word in any way. Use NO MORE THAN SEVEN WORDS. (7 pts.)</strong>" },
+                { type: "fill", id: 409, question: "1. The fee they are offering has nothing to do with the amount of work involved. (RELATION)\n→ The fee ________________________________ the amount of work involved.", correctAnswer: "bears no relation to", explanation: "Đáp án: bears no relation to. Cụm từ 'bear no relation to' = 'have nothing to do with' (không liên quan gì đến)." },
+                { type: "fill", id: 410, question: "2. The company had huge debts and was about to collapse. (BRINK)\n→ The company had huge debts and ________________________________.", correctAnswer: "was on the brink of collapse", explanation: "Đáp án: was on the brink of collapse. Idiom 'on the brink of' (trên bờ vực của)." },
+                { type: "fill", id: 411, question: "3. Her lawyers have advised her not to say anything to the newspapers. (AGAINST)\n→ Her lawyers ________________________________ anything to the newspapers.", correctAnswer: "have advised her against saying", explanation: "Đáp án: have advised her against saying. Cấu trúc 'advise sb against doing sth' (khuyên ai không nên làm gì)." },
+                { type: "fill", id: 412, question: "4. The hotel offers free breakfast and evening cocktails. (HOUSE)\n→ The hotel offers ________________________________", correctAnswer: "breakfast and evening cocktails on the house.", explanation: "Đáp án: breakfast and evening cocktails on the house. Idiom 'on the house' có nghĩa là miễn phí (được nhà hàng/khách sạn mời)." },
+                { type: "fill", id: 413, question: "5. The school would have faced closure but for money from local businesses. (SAVED)\n→ Money ________________________________ closure.", correctAnswer: "from local businesses saved the school from", explanation: "Đáp án: from local businesses saved the school from. Cấu trúc 'save sb/sth from sth' (cứu ai/cái gì khỏi điều gì)." },
+                { type: "fill", id: 414, question: "6. Because there remain several questions still to be answered, a meeting has been scheduled for next Monday. (REMAINING)\n→ There ________________________________ a meeting has been scheduled for next Monday.", correctAnswer: "remaining several questions still to be answered,", explanation: "Đáp án: remaining several questions still to be answered. Cấu trúc mệnh đề độc lập (absolute phrase) rút gọn với V-ing khi chủ ngữ là 'There'." },
+                { type: "fill", id: 415, question: "7. I was the one before the last competitor in the race. (SECOND)\n→ I came ________________________________ in the race.", correctAnswer: "second to last", explanation: "Đáp án: second to last. Cụm từ 'second to last' có nghĩa là áp chót, đứng thứ hai từ dưới lên." },
+
+                // --- PHẦN VIẾT LUẬN ---
+                { type: "title", text: "III. Essay Writing (10 pts.)" },
+                { type: "info", text: "<strong>📝 Hướng dẫn:</strong> Viết một bài luận ngắn (200-250 từ) trình bày quan điểm của cậu theo yêu cầu đề bài. Bài viết sẽ được gửi thẳng về hòm thư của giáo viên nhé! 🐚" },
+                { type: "essay", id: 416, question: "Some individuals believe that teenagers are suffering from more pressures than previous generations. To what extent do you agree or disagree with this statement? Write an essay of about 200-250 words to express your opinion." }
+	]
+	},
+{
+            id: "exam_phanboichau_2025_2026",
+            title: "🌊 Đề Chuyên Anh Phan Bội Châu 2025-2026",
+            data: [
+                // ================= SECTION B: LEXICO-GRAMMAR =================
+                { type: "title", text: "SECTION B: LEXICO-GRAMMAR - Part 1" },
+                { type: "info", text: "<strong>Choose the word or phrase that best completes each sentence.</strong>" },
+                { type: "mcq", id: 1, question: "1. Vietnamese singer Hoa Minzy’s latest music video, Bac Bling, has taken the internet by ______, captivating audiences with its perfect fusion of traditional Vietnamese culture and modern music production.", options: { A: "wind", B: "storm", C: "breeze", D: "tornado" }, correctAnswer: "B", explanation: "Đáp án B. Thành ngữ 'take something by storm' = gây bão, thu hút mạnh mẽ, nhanh chóng." },
+                { type: "mcq", id: 2, question: "2. While teachers at the school are not particularly strict, they are never ______ with students who skip classes or cheat on tests.", options: { A: "formal", B: "disciplined", C: "lenient", D: "adverse" }, correctAnswer: "C", explanation: "Đáp án C. 'be lenient with sb' = khoan dung, dễ dãi với ai. Nghĩa: giáo viên không quá nghiêm khắc nhưng không bao giờ dễ dãi với học sinh trốn học/gian lận." },
+                { type: "mcq", id: 3, question: "3. Marine reptiles are among the few creatures that are known to have a possible life span greater than ______.", options: { A: "man", B: "that of man", C: "the man’s", D: "the one of man’s" }, correctAnswer: "B", explanation: "Đáp án B. So sánh hơn phải so sánh cùng loại: life span (của bò sát) với 'that of man' (that = the life span)." },
+                { type: "mcq", id: 4, question: "4. People turned out in ______ to watch the parade on the 50th anniversary of Reunification Day in Vietnam.", options: { A: "volume", B: "mass", C: "force", D: "bulk" }, correctAnswer: "C", explanation: "Đáp án C. Cụm cố định 'turn out in force' = kéo đến với số lượng đông đảo." },
+                { type: "mcq", id: 5, question: "5. ______, playing music is an effective way for them to open their heart to the outside world.", options: { A: "Being visually impaired people", B: "Such were their visual impairments", C: "Having been visually impaired", D: "For those with visual impairments" }, correctAnswer: "D", explanation: "Đáp án D. 'For those with visual impairments, ...' (Đối với những người khiếm thị, ...) – đại từ 'them' ở mệnh đề sau thay cho 'those'. Các phương án còn lại sai cấu trúc/không hợp nghĩa." },
+                { type: "mcq", id: 6, question: "6. There are ______ words in English having more than one meaning. Pay close attention to this fact.", options: { A: "a large many", B: "quite many", C: "a great many", D: "quite a lot" }, correctAnswer: "C", explanation: "Đáp án C. 'a great many + N (số nhiều)' = rất nhiều. 'quite a lot' phải có 'of' mới đi với danh từ." },
+                { type: "mcq", id: 7, question: "7. It's very important that we ______ as soon as there's any change in the patient's condition.", options: { A: "be notified", B: "being notified", C: "are notified", D: "were notified" }, correctAnswer: "A", explanation: "Đáp án A. Câu giả định: It's important that + S + (should) + V nguyên thể. Ở đây dạng bị động: be notified." },
+                { type: "mcq", id: 8, question: "8. Choose the word CLOSEST in meaning to the underlined words:<br>Police officers <u>walk the beat</u> every night in order to make sure no one is committing a crime.", options: { A: "patrol", B: "appeal", C: "scrutinise", D: "investigate" }, correctAnswer: "A", explanation: "Đáp án A. 'walk the beat' = đi tuần tra khu vực được phân công ≈ patrol." },
+                { type: "mcq", id: 9, question: "9. Choose the words that are OPPOSITE in meaning to the underlined words:<br>Always willing to talk to the media, and skilled in <u>putting his view across</u>, he reserved most of his energies for negotiations at the highest political levels.", options: { A: "communicating his view effectively", B: "disapproving his opinion", C: "explaining his ideas clearly", D: "conveying his view unclearly" }, correctAnswer: "D", explanation: "Đáp án D. 'put one's view across' = truyền đạt quan điểm một cách hiệu quả; trái nghĩa là truyền đạt không rõ ràng (conveying his view unclearly)." },
+                { type: "mcq", id: 10, question: "10. Choose the option that best completes the following exchange.<br>Tom: “Judy is so excited about her trip to Hawaii.”<br>Mary: “______”", options: { A: "So do I.", B: "Sounds good to me.", C: "Who wouldn’t be?", D: "Don’t bother!" }, correctAnswer: "C", explanation: "Đáp án C. 'Who wouldn't be?' = Ai mà chẳng háo hức (đồng tình, hàm ý điều đó hiển nhiên)." },
+ 
+                { type: "title", text: "Part 2 - Word Formation" },
+                { type: "info", text: "<strong>Use the word given in capitals to form a word that fits in the space. Write your answers in the boxes provided.</strong>" },
+                { type: "passage", text: `<h3>LAKES</h3>
+<p>Lakes have always captured the imagination, and have inspired both artists and poets. A lake is a body of water (11)______ [CIRCLE] by land. The Greek word 'lakkos', meaning hole or pond, is the (12)______ [DERIVE] of the word. Lakes are (13)______ [IMMENSE] important for those living in the region, both (14)______ [AESTHETIC] and from a practical standpoint. Fresh-water lakes provide water for consumption and for irrigation. (15)______ [SIZE] lakes can affect local weather and are not (16)______ [SIGNIFY] as transport routes. Lakes are also important as (17)______ [RECREATION] areas, as their beauty and wealth of plant and animal life attract tourists and holidaymakers, who can enjoy a range of activities such as sailing or fishing.</p>
+<p>Various factors can lead to the formation of lakes. When rivers deposit silt, their natural outlet to the sea may become closed, resulting in the (18)______ [ACCUMULATE] of water. In limestone areas, water can gather in collapsed sinkholes, forming lakes. The largest (19)______ [CONCENTRATE] of lakes is in northern latitudes where glacial action has been at work. Artificial lakes created by dam construction are known as 'reservoirs'. Apart from providing water for everyday (20)______ [CONSUME] and for irrigation, they also produce hydro-electric power.</p>` },
+                { type: "fill", id: 11, question: "11. (CIRCLE) A lake is a body of water ______ by land.", correctAnswer: "encircled", explanation: "Đáp án: encircled (bị bao quanh). Rút gọn mệnh đề quan hệ bị động: a body of water (which is) encircled by land." },
+                { type: "fill", id: 12, question: "12. (DERIVE) ...is the ______ of the word.", correctAnswer: "derivation", explanation: "Đáp án: derivation (nguồn gốc). Cần danh từ sau mạo từ 'the'." },
+                { type: "fill", id: 13, question: "13. (IMMENSE) Lakes are ______ important for those living in the region...", correctAnswer: "immensely", explanation: "Đáp án: immensely. Cần trạng từ bổ nghĩa cho tính từ 'important'." },
+                { type: "fill", id: 14, question: "14. (AESTHETIC) ...both ______ and from a practical standpoint.", correctAnswer: "aesthetically", explanation: "Đáp án: aesthetically. Cần trạng từ song song với cụm 'from a practical standpoint'." },
+                { type: "fill", id: 15, question: "15. (SIZE) ______ lakes can affect local weather...", correctAnswer: "sizeable", explanation: "Đáp án: sizeable (cũng có thể viết 'sizable') = khá lớn. Cần tính từ đứng trước danh từ 'lakes'." },
+                { type: "fill", id: 16, question: "16. (SIGNIFY) ...and are not ______ as transport routes.", correctAnswer: "insignificant", explanation: "Đáp án: insignificant. 'are not insignificant' = không phải không quan trọng (vẫn quan trọng) – phù hợp ngữ cảnh." },
+                { type: "fill", id: 17, question: "17. (RECREATION) Lakes are also important as ______ areas...", correctAnswer: "recreational", explanation: "Đáp án: recreational. Cần tính từ bổ nghĩa cho 'areas' (khu vực giải trí)." },
+                { type: "fill", id: 18, question: "18. (ACCUMULATE) ...resulting in the ______ of water.", correctAnswer: "accumulation", explanation: "Đáp án: accumulation (sự tích tụ). Cần danh từ sau 'the'." },
+                { type: "fill", id: 19, question: "19. (CONCENTRATE) The largest ______ of lakes is in northern latitudes...", correctAnswer: "concentration", explanation: "Đáp án: concentration (mật độ/sự tập trung). Cần danh từ làm chủ ngữ." },
+                { type: "fill", id: 20, question: "20. (CONSUME) ...providing water for everyday ______ and for irrigation...", correctAnswer: "consumption", explanation: "Đáp án: consumption (sự tiêu dùng). Cần danh từ sau tính từ 'everyday'." },
+ 
+                { type: "title", text: "Part 3 - Error Identification" },
+                { type: "info", text: "<strong>The passage below contains 10 mistakes. Identify and correct the mistakes.</strong> Bên dưới là từ bị lỗi ở mỗi dòng, hãy sửa lại cho đúng." },
+                { type: "passage", text: `<div style="font-family: 'Times New Roman', Times, serif; font-size: 1.15em; line-height: 1.8; padding: 25px; background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: inset 0 0 10px rgba(0,0,0,0.02); color: #000;">
+<div style="text-align:center; font-weight:bold; margin-bottom:10px;">REWARDING CHILDREN</div>
+<div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(1)</span><div>Cash rewards is a common form of motivation used by parents with high expectations</div></div>
+<div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(2)</span><div>to encourage their children work hard at exam time. Some youngsters receive payments of as</div></div>
+<div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(3)</span><div>many as £100 for each A grade they obtain. But should such 'bribes' be based on exam</div></div>
+<div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(4)</span><div>performances or should they, as many parents and teachers feel, be offered in recognition for</div></div>
+<div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(5)</span><div>a child's effort, regardless of results? The later approach would solve the problem of how</div></div>
+<div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(6)</span><div>parents reward children with different levels of ability; imagine, for example, a family with one</div></div>
+<div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(7)</span><div>child who is academic gifted and another who has learning difficulties. The dangers of result-</div></div>
+<div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(8)</span><div>related incentives for the second child are clear; with much hope of obtaining the higher grades,</div></div>
+<div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(9)</span><div>the withholding of promised financial rewards would only compound the child's feeling of</div></div>
+<div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(10)</span><div>failure. Therefore, some leading educational psychologists believe that parents should rely on</div></div>
+<div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(11)</span><div>his own judgement in such matters. They maintain that if parents know that money will motivate</div></div>
+<div style="display: flex;"><span style="width: 40px; flex-shrink: 0; color: #555; font-weight: bold;">(12)</span><div>their child, then they should not condemn for operating a system of cash pay-outs.</div></div>
+</div>` },
+                { type: "fill", id: 21, question: "21. Line 1 (Lỗi: is) &rarr; Sửa thành:", correctAnswer: "are", explanation: "Đáp án: are. Chủ ngữ 'Cash rewards' là số nhiều nên động từ phải là 'are'." },
+                { type: "fill", id: 22, question: "22. Line 2 (Lỗi: work) &rarr; Sửa thành:", correctAnswer: "to work", explanation: "Đáp án: to work. Cấu trúc: encourage sb + to V." },
+                { type: "fill", id: 23, question: "23. Line 3 (Lỗi: many, trong 'as many as £100') &rarr; Sửa thành:", correctAnswer: "much", explanation: "Đáp án: much. 'as much as + số tiền' (tiền là lượng không đếm được theo cách diễn đạt này), không dùng 'as many as'." },
+                { type: "fill", id: 24, question: "24. Line 4 (Lỗi: for, trong 'in recognition for') &rarr; Sửa thành:", correctAnswer: "of", explanation: "Đáp án: of. Cụm cố định: 'in recognition of' = để ghi nhận." },
+                { type: "fill", id: 25, question: "25. Line 5 (Lỗi: later) &rarr; Sửa thành:", correctAnswer: "latter", explanation: "Đáp án: latter. 'the latter approach' = cách tiếp cận thứ hai (vừa nhắc sau). 'later' chỉ thời gian." },
+                { type: "fill", id: 26, question: "26. Line 7 (Lỗi: academic) &rarr; Sửa thành:", correctAnswer: "academically", explanation: "Đáp án: academically. Cần trạng từ bổ nghĩa cho tính từ 'gifted'." },
+                { type: "fill", id: 27, question: "27. Line 8 (Lỗi: much) &rarr; Sửa thành:", correctAnswer: "little", explanation: "Đáp án: little. 'with little hope of obtaining the higher grades' – đứa trẻ có khó khăn học tập ít hy vọng đạt điểm cao; 'much hope' mâu thuẫn với ý 'feeling of failure'." },
+                { type: "fill", id: 28, question: "28. Line 10 (Lỗi: Therefore) &rarr; Sửa thành:", correctAnswer: "however", explanation: "Đáp án: However. Quan điểm của các nhà tâm lý học đối lập (không phải hệ quả) với ý ngay trước đó nên cần từ nối chỉ sự tương phản." },
+                { type: "fill", id: 29, question: "29. Line 11 (Lỗi: his) &rarr; Sửa thành:", correctAnswer: "their", explanation: "Đáp án: their. Chủ ngữ 'parents' là số nhiều nên dùng 'their own judgement'." },
+                { type: "fill", id: 30, question: "30. Line 12 (Lỗi: condemn) &rarr; Sửa thành:", correctAnswer: "be condemned", explanation: "Đáp án: be condemned. Cấu trúc bị động sau 'should not': parents (bị) chỉ trích vì vận hành hệ thống thưởng tiền." },
+ 
+                // ================= SECTION C: READING =================
+                { type: "title", text: "SECTION C: READING - Part 1" },
+                { type: "info", text: "<strong>Read the following passage and choose the best answer from A, B, C or D to indicate the correct word for each of the blanks.</strong>" },
+                { type: "passage", text: `<h3>THE TRUE PRICE OF ORGANIC FARMING</h3>
+<p>Organic farming is a system of agricultural production that doesn't make use of genetically modified seeds and that (31)______ artificial pesticides and fertilisers with organic ones. But why is there almost always a (32)______ difference between the cost of organically produced food and that of non-organic alternatives?</p>
+<p>One reason organic produce is sold at considerably higher prices (which in some cases can be 100% higher) relates to labour costs, which are (33)______ greater for the organic farmer. A downside of not using chemicals is that food production is slower and crop failure more common. The organic farmer must therefore spend more time preparing the land and put a more (34)______ effort into tending to crops as well as controlling pests and weeds - sometimes by hand. What is more, as the (35)______ of livestock is prioritised in organic farming, feeding animals with better-quality food, as well as ensuring their living conditions are (36)______ keeps prices high. So, all things considered, organic food may actually be good value (37)______ money, which is probably why consumers are anything but discouraged from purchasing what they perceive to be much healthier, tastier food.</p>
+<p>Since concerns over the effects of conventional farming on both human health and the environment first (38)______, the number of people opting to (39)______ out conventionally produced food from their diet has been on the rise. In fact, the demand for organic produce is now so high that the supply is unable to meet it, and with organic farming (40)______ no more than 5% of total agricultural production in the UK, this is unlikely to change any time soon.</p>` },
+                { type: "mcq", id: 31, question: "31. Blank (31)", options: { A: "detects", B: "outlines", C: "substitutes", D: "imports" }, correctAnswer: "C", explanation: "Đáp án C. 'substitute A with B' = thay thế A bằng B." },
+                { type: "mcq", id: 32, question: "32. Blank (32)", options: { A: "substantial", B: "deep", C: "lengthy", D: "gradual" }, correctAnswer: "A", explanation: "Đáp án A. 'a substantial difference' = sự chênh lệch đáng kể (collocation)." },
+                { type: "mcq", id: 33, question: "33. Blank (33)", options: { A: "exclusively", B: "purely", C: "proficiently", D: "undoubtedly" }, correctAnswer: "D", explanation: "Đáp án D. 'undoubtedly greater' = chắc chắn cao hơn, phù hợp với ý giải thích lý do giá cao." },
+                { type: "mcq", id: 34, question: "34. Blank (34)", options: { A: "acute", B: "varied", C: "intense", D: "constant" }, correctAnswer: "C", explanation: "Đáp án C. 'put an intense effort into' = bỏ nhiều công sức. Các từ khác không đi với 'effort' trong ngữ cảnh này." },
+                { type: "mcq", id: 35, question: "35. Blank (35)", options: { A: "neglect", B: "consumption", C: "mastery", D: "well-being" }, correctAnswer: "D", explanation: "Đáp án D. 'the well-being of livestock' = sức khoẻ/phúc lợi của vật nuôi được ưu tiên." },
+                { type: "mcq", id: 36, question: "36. Blank (36)", options: { A: "sustainable", B: "optimal", C: "irresistible", D: "wholesome" }, correctAnswer: "B", explanation: "Đáp án B. 'living conditions are optimal' = điều kiện sống tối ưu." },
+                { type: "mcq", id: 37, question: "37. Blank (37)", options: { A: "for", B: "with", C: "through", D: "to" }, correctAnswer: "A", explanation: "Đáp án A. Cụm cố định: 'good value for money'." },
+                { type: "mcq", id: 38, question: "38. Blank (38)", options: { A: "strayed", B: "wandered", C: "roamed", D: "surfaced" }, correctAnswer: "D", explanation: "Đáp án D. 'concerns first surfaced' = mối lo ngại bắt đầu xuất hiện." },
+                { type: "mcq", id: 39, question: "39. Blank (39)", options: { A: "slice", B: "cut", C: "carve", D: "scratch" }, correctAnswer: "B", explanation: "Đáp án B. Phrasal verb 'cut out' = loại bỏ (khỏi chế độ ăn)." },
+                { type: "mcq", id: 40, question: "40. Blank (40)", options: { A: "accounting for", B: "carrying on", C: "leaving of", D: "treating to" }, correctAnswer: "A", explanation: "Đáp án A. 'account for + tỉ lệ' = chiếm bao nhiêu phần trăm." },
+ 
+                { type: "title", text: "Part 2 - Open Cloze" },
+                { type: "info", text: "<strong>Read the text below and think of the word which best fits each space. Use only ONE WORD in each space.</strong>" },
+                { type: "passage", text: `<p>When it comes to kids and cell phones, the age at (41)______ they receive their first one varies across different countries. In the United States, nearly half of children (42)______ 10 and 12 years old own a smartphone with a service plan. In (43)______, in Germany, children typically get their own mobile phone at a later age, often not until they (44)______ high school. Similarly, in other European countries, owning a mobile phone isn't as prevalent as (45)______ is in the US.</p>
+<p>In South Korea, children tend to receive their first mobile phones around second or third grade, (46)______ several hours daily on these devices. Conversely, in places like Malawi and Ghana, the ownership of mobile phones among children remains comparatively (47)______.</p>
+<p>Parents worldwide have contrasting opinions on this issue. Some see cell phones as a way to (48)______ in touch, while others remain vigilant about the potential risks they might bring. However, no specific age is considered ideal for a child to own a phone, according to the American Academy of Pediatrics. Instead, the focus is (49)______ monitoring usage and limiting use (50)______ bedtime, especially for younger children.</p>` },
+                { type: "fill", id: 41, question: "41. Blank (41)", correctAnswer: "which", explanation: "Đáp án: which. 'the age at which...' – giới từ + đại từ quan hệ." },
+                { type: "fill", id: 42, question: "42. Blank (42)", correctAnswer: "between", explanation: "Đáp án: between. 'between 10 and 12 years old' (khoảng từ 10 đến 12 tuổi)." },
+                { type: "fill", id: 43, question: "43. Blank (43)", correctAnswer: "contrast", explanation: "Đáp án: contrast. 'In contrast, ...' = ngược lại (đối lập với Mỹ)." },
+                { type: "fill", id: 44, question: "44. Blank (44)", correctAnswer: "reach", explanation: "Đáp án: reach (cũng chấp nhận 'enter'). 'not until they reach high school' = mãi đến khi lên cấp 3." },
+                { type: "fill", id: 45, question: "45. Blank (45)", correctAnswer: "it", explanation: "Đáp án: it. Đại từ thay cho 'owning a mobile phone' trong so sánh 'as prevalent as it is in the US'." },
+                { type: "fill", id: 46, question: "46. Blank (46)", correctAnswer: "spending", explanation: "Đáp án: spending. Rút gọn mệnh đề: ..., (and) spending several hours daily on these devices." },
+                { type: "fill", id: 47, question: "47. Blank (47)", correctAnswer: "low", explanation: "Đáp án: low. 'Conversely' (ngược lại) → tỉ lệ sở hữu ở Malawi và Ghana còn thấp." },
+                { type: "fill", id: 48, question: "48. Blank (48)", correctAnswer: "keep", explanation: "Đáp án: keep (cũng chấp nhận 'stay'). 'keep in touch' = giữ liên lạc." },
+                { type: "fill", id: 49, question: "49. Blank (49)", correctAnswer: "on", explanation: "Đáp án: on. 'the focus is on + V-ing' = trọng tâm là..." },
+                { type: "fill", id: 50, question: "50. Blank (50)", correctAnswer: "before", explanation: "Đáp án: before (cũng có thể 'around/near'). 'limiting use before bedtime' = hạn chế sử dụng trước giờ đi ngủ." },
+ 
+                { type: "title", text: "Part 3 - Multiple Choice Reading" },
+                { type: "info", text: "<strong>You are going to read an article about teenagers. For questions 51-57, choose the answer (A, B, C or D) which you think fits best according to the text.</strong>" },
+                { type: "passage", text: `<h3>Teenage brains</h3>
+<p><em>Journalist Martin Baines talks to neuroscientist Professor Sarah-Jayne Blakemore about the development of the brain during adolescence.</em></p>
+<p>Until I read Inventing Ourselves by Professor Sarah-Jayne Blakemore, I’d always assumed that what we think of as teenage behaviour is largely an invention of contemporary western society. I hadn’t imagined, for example, that 15-year-olds in the Kalahari Desert also complain about having to get up early - but they do. It was for people like me – there are lots of us – that Blakemore wrote her book explaining the science of everything from why teenagers can’t get out of bed in the morning to why they sometimes appear to be irresponsible narcissists. ‘We demonise teenagers more than any other section of society,’ she told me. ‘And it’s not right. They’re going through an essential stage of their development. Most adults don’t realise this.’</p>
+<p>This is arguably inevitable. Blakemore says that until 20 years ago, it was assumed that teenage behaviour was largely down to hormonal changes in puberty and that children’s brains were more or less fully developed. The findings of brain scans and psychological experiments have now revealed that the reality is very different, however. In fact, the brain continues to change all through the teenage years and well into adulthood, and important neurodevelopmental processes enable it to be moulded by the environment. So adolescence isn’t a critical period of neurological change, much of which is responsible for adolescent behaviour.</p>
+<p>Blakemore quotes from a teenager’s diary dated 20 July 1969: ‘I went to arts centre (by myself!) in yellow cords and blouse. Ian was there but didn’t speak to me. Got a rhyme put in my handbag from someone who’s apparently got a crush on me. It’s Nicholas, I think. UGH. Man landed on the moon.’ This may look like amazing – even jaw-dropping – self-absorption. But Blakemore says it’s essential neurological development, because the biological function of adolescence, today and in the past, is the creation of a sense of self. Teens achieve this through creating new allegiances, independent of their parents – which is why their friendships suddenly become extremely important. What is known on social media as FOMO – fear of missing out – may look like an irrational sense of priorities if it means skipping revision to attend a run-of-the-mill get-together, but at that age, nothing matters more than peer approval.</p>
+<p>Blakemore designed an experiment to explore this. Adolescents were asked to play an online ball game, with what they believed to be two other players of their own age. In fact, the game was with a computer programmed to ignore the human participants; these found themselves watching the ball being passed between two players on the screen who chose not to include them. She repeated the experiment with adults and found that, while the game lowered the mood and increased the anxiety levels of all participants, the effect was dramatically greater for the teenagers.</p>
+<p>In her book, Blakemore also discusses how the neurologically driven preoccupation with peer approval underlies adolescent risk-taking and acute self-consciousness, and how it determines adolescent sleep patterns. It’s fascinating, and I’m curious about the implications. What could be done to accommodate the changes adolescents go through?</p>
+<p>Blakemore suggests we might harness the power of peer pressure by getting adolescents to run educational campaigns – for example, on healthy eating. She also mentions schools which have altered their start times to fit in with teenage sleep patterns, though she points out there may be practical issues about implementing this on a wider scale. But generally, she’s wary about putting forward concrete solutions. This seems regrettable, but she insists she’s a scientist rather than a consultant. She doesn’t even like to be asked for parenting advice, although she admits her work does inform her own parenting. When she recently visited her teenage son’s school, he asked her to pretend not to know him. ‘I could’ve been so offended by that. But I thought: “That’s absolutely normal.”’</p>
+<p>One thing that makes Blakemore’s empathy and affection for teenagers so striking is its rarity. ‘Yes, I’m a champion of them,’ she agrees. But why does she think so many other adults feel differently? She often thinks about why we find it hilarious to <u>‘take the mickey out of’</u> teenagers. She points out that there are whole comedy shows mocking their behaviour. She wonders if adults do it to <u>cope with</u> their rejection; small children obey, adults want to be with them, but teenagers, through necessity, look for independence, and the older generations <u>feel hurt about</u> this. They <u>resent</u> adolescents’ desire to rebel and their sense of embarrassment when they’re with parents. ‘Our way of dealing with these changes is to <u>sneer at</u> them.’</p>` },
+                { type: "mcq", id: 51, question: "51. What is the writer doing in the first paragraph?", options: { A: "outlining how he feels about the way teenagers are generally perceived", B: "giving his reasons for writing a profile of Professor Blakemore", C: "pointing out international variations in teenage behaviour", D: "acknowledging his relative ignorance about teenagers" }, correctAnswer: "D", explanation: "Đáp án D. Tác giả thừa nhận: 'I'd always assumed...', 'I hadn't imagined...', và viết cuốn sách 'for people like me' – tức thừa nhận mình từng thiếu hiểu biết về thanh thiếu niên." },
+                { type: "mcq", id: 52, question: "52. The writer suggests that the way teenage behaviour is commonly regarded is unsurprising because ______.", options: { A: "behavioural development is a complex subject", B: "significant progress in relevant areas of study is relatively recent", C: "people’s outlook on life is partly determined by neurological factors", D: "differences between generations will always cause misunderstanding" }, correctAnswer: "B", explanation: "Đáp án B. Đoạn 2: 'This is arguably inevitable. Until 20 years ago, it was assumed...' – các phát hiện mới từ quét não chỉ xuất hiện gần đây." },
+                { type: "mcq", id: 53, question: "53. What does the writer suggest is ‘jaw-dropping’ about the teenager’s diary entry?", options: { A: "the strong desire for independence that comes across", B: "the similarity with what young people talk about today", C: "the negative comments about two acquaintances", D: "the focus on personal rather than wider events" }, correctAnswer: "D", explanation: "Đáp án D. Nhật ký chỉ nói về chuyện cá nhân (áo quần, bạn bè...), còn sự kiện con người đặt chân lên Mặt Trăng chỉ được nhắc thoáng qua ở cuối – 'self-absorption'." },
+                { type: "mcq", id: 54, question: "54. The experiment described in the fourth paragraph was designed to provide evidence of ______.", options: { A: "how competitive teenagers tend to be", B: "how easily teenagers can be deceived", C: "how sensitive teenagers are to social exclusion", D: "how immersed teenagers can become in video games" }, correctAnswer: "C", explanation: "Đáp án C. Thí nghiệm cho thấy khi bị loại khỏi trò chơi, tâm trạng và mức lo âu của thanh thiếu niên bị ảnh hưởng nhiều hơn hẳn người lớn." },
+                { type: "mcq", id: 55, question: "55. In the sixth paragraph, the writer expresses ______.", options: { A: "disappointment at Blakemore’s reluctance to advocate specific policies", B: "enthusiasm for the idea of giving teenagers more responsibility", C: "amusement at Blakemore’s difficulties with her own children", D: "doubt regarding the feasibility of changing school hours" }, correctAnswer: "A", explanation: "Đáp án A. 'But generally, she's wary about putting forward concrete solutions. This seems regrettable...' – tác giả tiếc vì bà ngại đề xuất giải pháp cụ thể." },
+                { type: "mcq", id: 56, question: "56. Which underlined words in the final paragraph echo the underlined phrase ‘take the mickey out of’?", options: { A: "cope with", B: "feel hurt about", C: "resent", D: "sneer at" }, correctAnswer: "D", explanation: "Đáp án D. 'take the mickey out of' = chế giễu, châm biếm ≈ 'sneer at' (cười nhạo). Câu cuối: 'Our way of dealing with these changes is to sneer at them.'" },
+                { type: "mcq", id: 57, question: "57. The article implies that the primary reason for persistent adult negativity towards teenagers, despite new scientific insights, is ______.", options: { A: "the inherent complexity of applying neuroscientific findings to everyday practicalities", B: "a societal unwillingness to adapt established views on youth and generational authority", C: "insufficient institutional efforts to disseminate modern psychological knowledge widely", D: "teenagers' own challenging behaviours naturally provoking such adult reactions" }, correctAnswer: "D", explanation: "Đáp án D. Đoạn cuối: thanh thiếu niên tìm kiếm sự độc lập, muốn nổi loạn, ngại đi cùng bố mẹ → người lớn cảm thấy tổn thương, bực bội và chế giễu. Các đáp án A, B, C không được bài đề cập." },
+ 
+                { type: "title", text: "Part 4 - Reading (True/False/Not Given, Summary, Short Answer)" },
+                { type: "passage", text: `<h3>Why Do We Touch Strangers So Much? A History Of The Handshake Offers Clues</h3>
+<p><em>For thousands of years, the handshake has been used for different purposes.</em></p>
+<p><strong>A.</strong> There is a lot that can be conveyed in a handshake, a kiss, or a hug. Throughout history, such a greeting was used to signal friendship, finalize a business transaction, or indicate religious devotion. Touching strangers, however, can also transmit other, less beneficial shared outcomes—like disease outbreaks. As fears about COVID-19, or coronavirus, mount, France has warned its citizens to pause their famous cheek kisses, and across the world, business deals are being sealed with an elbow bump. But with histories tracing back thousands of years, both greetings are likely too entrenched to be so easily halted.</p>
+<p><strong>B.</strong> A popular theory on the handshake’s origin is that it began as a gesture of peace. Grasping hands proved one was not holding a weapon—and shaking them was a way to ensure a partner had nothing hiding up their sleeve. So far, there has not been any reliable evidence to prove this assumption. Throughout the ancient world, the handshake appears on vases, gravestones, and stone slabs in scenes of weddings, gods making deals, young warriors departing for war, and the newly dead’s arrival to the afterlife. In the literary canon, it stretches to the Iliad and the Odyssey. The handshake’s catch-all utility, used in friendship, romance, and business alike, makes interpretation difficult. “The handshake continues to be a popular image today because we too see it as a complex and ambiguous motif,” writes art historian Glenys Davies in an analysis of its use in classical art.</p>
+<p><strong>C.</strong> In America, it is likely that the handshake’s popularity was propelled by 18th century Quakers. In their efforts to eschew the hierarchy and social rank, they found the handshake a more democratic form of greeting to the then-common bow, curtsy, or hat doffing. “In their place, Quakers put the practice of the handshake, extended to everyone regardless of station, as we still do,” writes historian Michael Zuckerman. There may be a scientific explanation for its lasting power. In a 2015 study, researchers in Israel filmed handshakes between hundreds of strangers and found nearly a quarter of participants sniffed their hands afterwards. They theorized that a handshake might be unconsciously used to detect chemical signals, and possibly as a means of communication—just as other animals do by smelling each other.</p>
+<p><strong>D.</strong> The kiss-as-greeting has a similarly rich history. It was incorporated into early Christianity and used in religious ceremonies. “In his Epistle to the Romans, St. Paul instructed followers to ‘salute one another with a holy kiss,’” writes Andy Scott in the book One Kiss or Two: In Search of the Perfect Greeting. In the Middle Ages, a kiss was used as a sign of fidelity and to seal agreements like property transfers.</p>
+<p><strong>E.</strong> Today, a swift kiss on the cheek known in French as “la bise,” is a standard greeting in much of the world. The word may have originated with the Romans, who had a different term for each type of kiss and called the polite version “basium.” In Paris, two kisses are common. In Provence expect three, and four is the norm in the Loire Valley. The cheek kiss is also common in countries like Egypt, where three kisses is customary, Latin America, and the Philippines. It is thought that during the plague in the 14th century, la bise may have stopped and was not revived again until 400 years later, after the French Revolution. In 2009, la bise was temporarily paused as swine flu became a concern. At the end of February, the French Health Minister advised against it as the coronavirus cases increased. “The reduction in social contacts of a physical nature is advised,” he said. “That includes the practice of the bise.”</p>
+<p><strong>F.</strong> In her book Don’t Look, Don’t Touch, behavioural scientist Val Curtis of the London School of Hygiene and Tropical Medicine, says that one possible reason for the kiss and handshake as a greeting is to signify that the other person is trusted enough to share germs with. Because of this, the practice can go in and out of style depending on public health concerns. In a 1929 study, a nurse named Leila Given wrote an article in the American Journal of Nursing lamenting the loss of the last generation’s “finger-tipping and the high handshake” customs in favour of a handshake. She warned that hands “are agents of bacterial transfer” and cited early studies showing that a handshake could easily spread germs. In conclusion, she recommended that Americans adopt the Chinese custom at the time of shaking one’s own hands together when greeting a friend. “At least our bacteria would then stay at home,” she wrote.</p>` },
+                { type: "info", text: "<strong>Questions 58-64: Do the following statements agree with the information given in the reading passage?</strong><br>TRUE if the statement agrees with the information<br>FALSE if the statement contradicts the information<br>NOT GIVEN if there is no information on this" },
+                { type: "mcq", id: 58, question: "58. Shaking hands is an indicator of hospitality.", options: { TRUE: "TRUE", FALSE: "FALSE", NOT_GIVEN: "NOT GIVEN" }, correctAnswer: "NOT_GIVEN", explanation: "Đáp án: NOT GIVEN. Đoạn A chỉ nói lời chào dùng để thể hiện tình bạn, chốt giao dịch, lòng sùng đạo – không nhắc đến 'hospitality' (lòng hiếu khách)." },
+                { type: "mcq", id: 59, question: "59. Evidence showed that the handshake started as a sign of peace.", options: { TRUE: "TRUE", FALSE: "FALSE", NOT_GIVEN: "NOT GIVEN" }, correctAnswer: "FALSE", explanation: "Đáp án: FALSE. Đoạn B: 'there has not been any reliable evidence to prove this assumption' – chưa có bằng chứng đáng tin cậy." },
+                { type: "mcq", id: 60, question: "60. When shaking hands, people often rolled up their sleeves.", options: { TRUE: "TRUE", FALSE: "FALSE", NOT_GIVEN: "NOT GIVEN" }, correctAnswer: "NOT_GIVEN", explanation: "Đáp án: NOT GIVEN. Đoạn B chỉ nói bắt tay để chắc chắn đối phương không giấu gì trong tay áo, không nói việc xắn tay áo." },
+                { type: "mcq", id: 61, question: "61. The use of a handshake in different situations can be unpredictable.", options: { TRUE: "TRUE", FALSE: "FALSE", NOT_GIVEN: "NOT GIVEN" }, correctAnswer: "TRUE", explanation: "Đáp án: TRUE. Đoạn B: bắt tay được dùng trong tình bạn, tình yêu, kinh doanh nên 'makes interpretation difficult'; 'complex and ambiguous motif' – khó lường, khó giải nghĩa." },
+                { type: "mcq", id: 62, question: "62. In America, handshakes became prevalent because they represented equality and freedom.", options: { TRUE: "TRUE", FALSE: "FALSE", NOT_GIVEN: "NOT GIVEN" }, correctAnswer: "TRUE", explanation: "Đáp án: TRUE. Đoạn C: người Quaker bỏ thứ bậc, địa vị xã hội; bắt tay là cách chào 'democratic', dành cho mọi người 'regardless of station'." },
+                { type: "mcq", id: 63, question: "63. A research conducted in 2015 showed that exactly 25% of participants smelled their hands after a handshake.", options: { TRUE: "TRUE", FALSE: "FALSE", NOT_GIVEN: "NOT GIVEN" }, correctAnswer: "FALSE", explanation: "Đáp án: FALSE. Đoạn C: 'nearly a quarter' (gần một phần tư) chứ không phải chính xác 25%." },
+                { type: "mcq", id: 64, question: "64. People often smell their hands to spot poisonous chemicals.", options: { TRUE: "TRUE", FALSE: "FALSE", NOT_GIVEN: "NOT GIVEN" }, correctAnswer: "NOT_GIVEN", explanation: "Đáp án: NOT GIVEN. Bài chỉ nói bắt tay có thể vô thức dùng để phát hiện tín hiệu hóa học/giao tiếp, không nhắc đến chất độc." },
+ 
+                { type: "info", text: "<strong>Questions 65-68: Complete the summary below. Choose NO MORE THAN THREE WORDS AND/OR A NUMBER from the passage for each answer.</strong><br><br><strong>The history of cheek kissing</strong><br>In the past, Christian used cheek kisses in (65)______. In the Middle Age, the kiss-as-greeting was used to show (66)______ or used in making agreements. At present, it is a norm for people almost all over the world to greet each other. In Rome, people named different types of kisses in different ways. It is common for people in Paris to exchange (67)______. The standard is three in Provence and four in the Loire Valley. A kiss on the cheek is also popular among people of Egypt, Latin America and the Philippines. People believe that in the 14th century, the cheek kiss might have been paused and it remained so for 400 years. In 2009, due to (68)______ cheek kisses were also stopped for a while." },
+                { type: "fill", id: 65, question: "65. Blank (65)", correctAnswer: "religious ceremonies", explanation: "Đáp án: religious ceremonies. Đoạn D: 'incorporated into early Christianity and used in religious ceremonies'." },
+                { type: "fill", id: 66, question: "66. Blank (66)", correctAnswer: "fidelity", explanation: "Đáp án: fidelity. Đoạn D: 'In the Middle Ages, a kiss was used as a sign of fidelity...'." },
+                { type: "fill", id: 67, question: "67. Blank (67)", correctAnswer: "two kisses", explanation: "Đáp án: two kisses. Đoạn E: 'In Paris, two kisses are common.'" },
+                { type: "fill", id: 68, question: "68. Blank (68)", correctAnswer: "swine flu", explanation: "Đáp án: swine flu. Đoạn E: 'In 2009, la bise was temporarily paused as swine flu became a concern.'" },
+ 
+                { type: "info", text: "<strong>Questions 69-70: Answer the questions below. Choose NO MORE THAN TWO WORDS from the passage for each answer.</strong>" },
+                { type: "fill", id: 69, question: "69. What did the French Health Minister advise people to avoid to prevent the spread of coronavirus?", correctAnswer: "la bise", explanation: "Đáp án: la bise (cũng có thể chấp nhận 'the bise'). Đoạn E: bộ trưởng y tế Pháp khuyến cáo tránh 'la bise' (hôn má chào hỏi)." },
+                { type: "fill", id: 70, question: "70. What can be transferred from a handshake?", correctAnswer: "germs", explanation: "Đáp án: germs (cũng có thể chấp nhận 'bacteria'). Đoạn F: 'a handshake could easily spread germs'; 'agents of bacterial transfer'." },
+ 
+                // ================= SECTION D: WRITING =================
+                { type: "title", text: "SECTION D: WRITING - Part 1" },
+                { type: "info", text: "<strong>For each of the sentences below, write a new sentence as similar as possible in meaning to the original sentence, using the word given. This word must not be altered in any way.</strong>" },
+                { type: "fill", id: 71, question: "71. He is the clumsiest person in the world when it comes to mending anything. (FINGERS)\n&rarr; He’s all ________________________________", correctAnswer: "fingers and thumbs when it comes to mending anything", explanation: "Đáp án: fingers and thumbs when it comes to mending anything. Thành ngữ 'be all fingers and thumbs' = vụng về, hậu đậu." },
+                { type: "fill", id: 72, question: "72. Jim felt uncomfortable because he didn’t know anyone at the party. (EASE)\n&rarr; Jim felt ill ________________________________", correctAnswer: "at ease because he didn't know anyone at the party", explanation: "Đáp án: at ease because he didn't know anyone at the party. Thành ngữ 'feel ill at ease' = cảm thấy không thoải mái, lúng túng." },
+                { type: "fill", id: 73, question: "73. I’m sick of that program because I’ve watched it too often. (OFF)\n&rarr; I’ve ________________________________ because I’ve watched it too often.", correctAnswer: "gone off that program", explanation: "Đáp án: gone off that program. 'go off sth' = hết thích, chán cái gì." },
+                { type: "fill", id: 74, question: "74. Why don’t you two forget the differences and become friends again? (HATCHET)\n&rarr; Why don’t you two ________________________________ and become friends again?", correctAnswer: "bury the hatchet", explanation: "Đáp án: bury the hatchet. Thành ngữ = làm hòa, bỏ qua hiềm khích." },
+                { type: "fill", id: 75, question: "75. At your age, you should have learnt to do things for yourself, Henry. (FEET)\n&rarr; At your age, you should have learnt to ________________________________, Henry.", correctAnswer: "stand on your own two feet", explanation: "Đáp án: stand on your own two feet. Thành ngữ = tự lập, tự lo cho bản thân." },
+ 
+                { type: "title", text: "Part 2 - Letter Writing (120-150 words)" },
+                { type: "info", text: "<strong>📝 Hướng dẫn:</strong> Viết thư khoảng 120-150 từ. Bài viết sẽ được gửi thẳng về hộp thư của giáo viên nhé!" },
+                { type: "essay", id: 76, question: "You have received a letter from your pen pal asking about significant events in Vietnam. Write a letter (120-150 words) to your pen pal describing the 50th anniversary of Reunification Day in Vietnam, which was celebrated on April 30th, 2025. In your letter:<br>- Explain what Reunification Day commemorates.<br>- Describe how the 50th anniversary was celebrated in Vietnam, highlighting any special events or ceremonies.<br>- Share your personal thoughts on the significance of this day in Vietnam’s history.<br>Use your name and address as <strong>Lan Anh – 75 Le Loi Street, Vinh City, Nghe An Province</strong>." },
+ 
+                { type: "title", text: "Part 3 - Essay Writing (at least 250 words)" },
+                { type: "info", text: "<strong>📝 Hướng dẫn:</strong> Viết bài luận tối thiểu 250 từ. Bài viết sẽ được gửi thẳng về hộp thư của giáo viên nhé!" },
+                { type: "essay", id: 77, question: "In recent years, an increasing number of companies have been hiring celebrities to advertise their products. This practice is believed to do more harm than good to their customers. To what extent do you agree or disagree?<br>Write an essay to support your opinion. Give reasons for your answer and include any relevant examples from your own knowledge or experience." }
+            ]
+        }
+ 	
+    ];
+
+   let currentExamData = [];
+    let totalQuestions = 0;
+
+    function initSidebar() {
+        const listContainer = document.getElementById('exam-list-container');
+        examDatabase.forEach((exam, index) => {
+            const li = document.createElement('li');
+            li.className = 'exam-item';
+            if (index === 0) li.classList.add('active');
+            li.innerText = exam.title;
+            li.onclick = () => {
+                document.querySelectorAll('.exam-item').forEach(el => el.classList.remove('active'));
+                li.classList.add('active');
+                loadExam(exam.id);
+            };
+            listContainer.appendChild(li);
+        });
+        
+        if (examDatabase.length > 0) loadExam(examDatabase[0].id);
+    }
+
+    function loadExam(examId) {
+        const exam = examDatabase.find(e => e.id === examId);
+        if (!exam) return;
+
+        currentExamData = exam.data;
+        totalQuestions = 0;
+        
+        document.getElementById('display-exam-title').innerText = exam.title;
+        const container = document.getElementById('questions-container');
+        container.innerHTML = '';
+        document.getElementById('result-container').style.display = 'none';
+        
+        const btn = document.getElementById('submit-btn');
+        btn.style.display = 'block';
+        btn.disabled = false;
+        btn.innerText = "Nộp bài & Chấm điểm 🐚";
+
+        currentExamData.forEach((q) => {
+            if (q.type === "title") {
+                const div = document.createElement('div');
+                div.className = 'section-title';
+                div.innerHTML = q.text;
+                container.appendChild(div);
+                return;
+            }
+            if (q.type === "passage") {
+                const div = document.createElement('div');
+                div.className = 'glass-panel passage-block';
+                div.innerHTML = q.text;
+                container.appendChild(div);
+                return;
+            }
+            if (q.type === "info") {
+                const div = document.createElement('div');
+                div.className = 'info-box';
+                div.innerHTML = q.text;
+                container.appendChild(div);
+                return;
+            }
+
+            const qDiv = document.createElement('div');
+            qDiv.className = 'glass-panel question-block';
+            qDiv.id = `question-block-${q.id}`;
+            
+            let inputHtml = '';
+            
+            if (q.type === "mcq") {
+                totalQuestions++;
+                let optionsHtml = '';
+                for (const [key, value] of Object.entries(q.options)) {
+                    optionsHtml += `
+                        <li>
+                            <label class="custom-radio-label">
+                                <input type="radio" name="q_${q.id}" value="${key}">
+                                <span class="radio-mark"></span>
+                                <span class="option-text"><strong>${key}.</strong> ${value}</span>
+                            </label>
+                        </li>`;
+                }
+                inputHtml = `<ul class="options">${optionsHtml}</ul>`;
+            } 
+            else if (q.type === "fill") {
+                totalQuestions++;
+                inputHtml = `<input type="text" class="premium-input" id="input_${q.id}" placeholder="Nhập đáp án của cậu vào đây...">`;
+            }
+            else if (q.type === "dropdown") {
+                totalQuestions++;
+                let opts = '<option value="" disabled selected>-- Chọn đáp án --</option>';
+                q.options.forEach(opt => { opts += `<option value="${opt}">${opt}</option>`; });
+                inputHtml = `<select class="premium-select" id="input_${q.id}">${opts}</select>`;
+            }
+            else if (q.type === "essay") {
+                inputHtml = `<textarea class="premium-textarea" id="input_${q.id}" placeholder="Viết bài luận của cậu tại đây nhé..."></textarea>`;
+            }
+
+            let expHtml = q.explanation ? `<div class="explanation" id="exp-${q.id}"><strong>🐚 Giải thích:</strong><br>${q.explanation}</div>` : '';
+
+            qDiv.innerHTML = `
+                <div class="question-text">${q.question.replace(/\n/g, '<br>')}</div>
+                ${inputHtml}
+                ${expHtml}
+            `;
+            container.appendChild(qDiv);
+        });
+        
+        document.querySelector('.main-content').scrollTo(0, 0);
+    }
+
+    async function submitQuiz() {
+        const studentName = document.getElementById('student_name').value.trim();
+        const studentEmail = document.getElementById('student_email').value.trim();
+        const examTitle = document.getElementById('display-exam-title').innerText;
+        
+        if (!studentName || !studentEmail) {
+            alert("🐚 Cậu quên điền Họ tên hoặc Email rồi kìa!");
+            document.getElementById('student_name').focus();
+            return;
+        }
+
+        const btn = document.getElementById('submit-btn');
+        btn.disabled = true;
+        btn.innerText = "Đang chấm điểm và gửi bài... 🌊";
+
+        let score = 0;
+        let essayContent = "";
+        
+        // 1. TÍNH ĐIỂM
+        currentExamData.forEach(q => {
+            if (q.type === "essay") {
+                const eVal = document.getElementById(`input_${q.id}`);
+                if (eVal) essayContent = eVal.value;
+                return;
+            }
+
+            if (!["mcq", "fill", "dropdown"].includes(q.type)) return;
+
+            const block = document.getElementById(`question-block-${q.id}`);
+            const exp = document.getElementById(`exp-${q.id}`);
+            let isCorrect = false;
+            let answered = false;
+
+            if (q.type === "mcq") {
+                const sel = document.querySelector(`input[name="q_${q.id}"]:checked`);
+                if (sel) {
+                    answered = true;
+                    if (sel.value === q.correctAnswer) isCorrect = true;
+                }
+            } else {
+                const inputEl = document.getElementById(`input_${q.id}`);
+                const val = inputEl ? inputEl.value.trim().toLowerCase() : "";
+                if (val !== "") {
+                    answered = true;
+                    if (val === q.correctAnswer.toLowerCase()) isCorrect = true;
+                }
+            }
+
+            if (answered) {
+                if (isCorrect) {
+                    score++;
+                    block.style.borderColor = "#34d399";
+                    block.style.backgroundColor = "rgba(209, 250, 229, 0.7)";
+                } else {
+                    block.style.borderColor = "#fb7185";
+                    block.style.backgroundColor = "rgba(254, 226, 226, 0.7)";
+                }
+            } else {
+                block.style.borderColor = "#fbbf24";
+                block.style.backgroundColor = "rgba(254, 243, 199, 0.7)";
+            }
+            
+            if (exp) exp.style.display = "block";
+        });
+
+        // 2. HIỂN THỊ KẾT QUẢ NGAY LẬP TỨC
+        document.getElementById('score-text').innerText = `${score} / ${totalQuestions}`;
+        document.getElementById('result-container').style.display = 'block';
+        document.getElementById('result-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // 3. GỬI DỮ LIỆU ĐẾN FORMSPREE
+        const FORMSPREE_URL = "https://formspree.io/f/mkjgqkrd"; 
+        
+        const payloadData = {
+            _subject: `[KẾT QUẢ THI] - ${studentName} - ${examTitle} (${score}/${totalQuestions})`,
+            exam_title: examTitle,
+            student_name: studentName,
+            email: studentEmail,
+            score: `${score} / ${totalQuestions}`,
+            essay_content: essayContent || "[Học sinh không viết bài luận]"
+        };
+
+        try {
+            const response = await fetch(FORMSPREE_URL, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json' 
+                },
+                body: JSON.stringify(payloadData)
+            });
+
+            if (response.ok) {
+                btn.innerText = "Đã Nộp Bài & Gửi Thành Công! 🎉";
+            } else {
+                const resData = await response.json();
+                console.warn("Lỗi phản hồi từ Formspree:", resData);
+                alert("Lỗi Formspree: " + JSON.stringify(resData));
+                btn.innerText = "Đã Chấm Điểm Xong! (Lỗi Formspree) 🐚";
+            }
+        } catch (error) {
+            console.error("Lỗi kết nối:", error);
+            btn.innerText = "Đã Chấm Điểm Xong! (Lỗi mạng) 🐚";
+        }
+	}
+
+    initSidebar();
+</script>
+</body>
+</html>
