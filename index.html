@@ -425,6 +425,52 @@
         }
         
         .explanation strong { color: var(--accent-dark); font-family: 'Baloo 2', sans-serif; }
+
+        :root { --card-bg: rgba(255, 255, 255, 0.78); --radius-md: 14px; --radius-lg: 18px; --shadow-soft: 0 8px 22px rgba(13, 79, 102, 0.12); }
+        .main-content { min-width: 0; min-height: 0; padding: 16px 20px 40px; }
+        .exam-picker-bar {
+            position: sticky; top: 0; z-index: 5; width: min(100%, 1100px); margin: 0 auto 18px; padding: 12px 16px;
+            display: flex; justify-content: space-between; align-items: center; gap: 10px 20px;
+            background: rgba(255,255,255,.84); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,.9); border-radius: 14px; box-shadow: 0 5px 18px rgba(13,79,102,.12);
+        }
+        .exam-picker-brand { min-width: 0; }
+        .exam-picker-brand h2 { margin: 0; color: var(--primary-dark); font: 800 1.15em 'Baloo 2', sans-serif; }
+        .exam-picker-brand p { margin: 0; color: var(--text-muted); font-size: .85em; font-weight: 600; }
+        .exam-picker-control { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .exam-picker-control label { flex-shrink: 0; font-weight: 700; color: var(--primary-dark); }
+        #exam-picker { width: min(52vw, 520px); min-width: 240px; }
+        .exam-container { max-width: 1040px; }
+        .exam-title-wrapper { padding: 20px; margin-bottom: 18px; }
+        .exam-title { font-size: 1.8em; }
+        .section-title {
+            width: fit-content; max-width: 100%; padding: 8px 16px; border-radius: 10px;
+            background: rgba(255,255,255,.82); backdrop-filter: blur(5px); font-size: 1.1em;
+        }
+        .passage-block {
+            width: min(100%, 82ch); margin: 0 auto 20px; padding: 18px 20px; font-size: 1em;
+            color: var(--text-main); line-height: 1.75; background: #fff; backdrop-filter: none;
+            border: 1px solid var(--border-color); border-radius: 14px; box-shadow: none;
+        }
+        .question-block { margin-bottom: 16px; padding: 20px; background: var(--card-bg); }
+        .info-box { padding: 15px 18px; background: rgba(255,255,255,.9); }
+        .result-panel { margin-top: 24px; padding: 24px; border-radius: 14px; }
+        @media (max-width: 700px) {
+            .main-content { padding: 10px 12px 30px; }
+            .exam-picker-bar { align-items: stretch; flex-direction: column; padding: 12px; }
+            .exam-picker-control { align-items: stretch; flex-direction: column; gap: 5px; }
+            #exam-picker { width: 100%; min-width: 0; max-width: none; }
+            .exam-title-wrapper { padding: 16px; margin-bottom: 18px; }
+            .exam-title { font-size: 1.5em; }
+            .section-title { margin: 24px 0 14px; padding: 8px 12px; font-size: 1.05em; }
+            .question-block { padding: 15px; }
+            .passage-block { padding: 15px; font-size: .98em; }
+            .custom-radio-label { padding: 10px 12px; }
+            .premium-input, .premium-select, .premium-textarea { padding: 12px 14px; font-size: 1em; }
+            .premium-select { width: 100%; min-width: 0; }
+            .btn-submit { margin-top: 24px; padding: 14px; font-size: 1.05em; }
+            .result-panel { padding: 20px; }
+        }
     </style>
 </head>
 <body>
@@ -445,19 +491,18 @@
         </svg>
     </div>
 
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <h2>🐚 Đề thi thử vào 10 chuyên các tỉnh thành 🌊</h2>
-            <p>Tuyển tập đề thi vào 10</p>
-        </div>
-        <ul class="exam-list" id="exam-list-container">
-            <!-- Render danh sách đề -->
-        </ul>
-    </div>
-
     <!-- MAIN CONTENT -->
     <div class="main-content">
+        <header class="exam-picker-bar">
+            <div class="exam-picker-brand">
+                <h2>Đề thi thử vào 10 chuyên</h2>
+                <p>Tuyển tập đề thi các tỉnh thành</p>
+            </div>
+            <div class="exam-picker-control">
+                <label for="exam-picker">Chọn đề thi</label>
+                <select id="exam-picker" class="premium-select" aria-label="Chọn đề thi"></select>
+            </div>
+        </header>
         <div class="exam-container">
             <div class="glass-panel exam-title-wrapper">
                 <h1 class="exam-title" id="display-exam-title">Vui lòng chọn đề thi</h1>
@@ -483,7 +528,7 @@
 
             <div class="glass-panel result-panel" id="result-container">
                 <h2>Kết Quả: <span id="score-text"></span> 🎉</h2>
-                <p style="font-weight: 600; font-size: 1.1em; color: #4c1d95;">Tuyệt vời! Kết quả và bài làm của cậu đã được gửi đi an toàn.<br>Cậu có thể lướt lên trên để xem chi tiết đáp án nhé! 🌊</p>
+                <p id="result-message" style="font-weight: 600; font-size: 1.1em; color: #4c1d95;">Điểm số và bài làm được lưu trên trình duyệt này để cậu xem lại.</p>
             </div>
         </div>
     </div>
@@ -961,43 +1006,85 @@
  	
     ];
 
-   let currentExamData = [];
+    const ATTEMPT_STORAGE_KEY = "pony_exam_attempts_v1";
+    const LAST_EXAM_STORAGE_KEY = "pony_exam_last_id";
+    let currentExamId = null;
+    let currentExamData = [];
+    let currentAnswers = {};
+    let currentAttempt = {};
+    let attemptRecords = {};
     let totalQuestions = 0;
 
-    function initSidebar() {
-        const listContainer = document.getElementById('exam-list-container');
-        examDatabase.forEach((exam, index) => {
-            const li = document.createElement('li');
-            li.className = 'exam-item';
-            if (index === 0) li.classList.add('active');
-            li.innerText = exam.title;
-            li.onclick = () => {
-                document.querySelectorAll('.exam-item').forEach(el => el.classList.remove('active'));
-                li.classList.add('active');
-                loadExam(exam.id);
-            };
-            listContainer.appendChild(li);
-        });
-        
-        if (examDatabase.length > 0) loadExam(examDatabase[0].id);
+    try {
+        attemptRecords = JSON.parse(localStorage.getItem(ATTEMPT_STORAGE_KEY) || "{}") || {};
+    } catch (error) {
+        attemptRecords = {};
+    }
+
+    function initExamPicker() {
+        const picker = document.getElementById('exam-picker');
+        picker.innerHTML = examDatabase.map(exam => `<option value="${exam.id}">${exam.title}</option>`).join('');
+        picker.addEventListener('change', () => loadExam(picker.value));
+
+        const resumableExam = examDatabase
+            .filter(exam => attemptRecords[exam.id]?.status === "in-progress")
+            .sort((first, second) => (attemptRecords[second.id].updatedAt || 0) - (attemptRecords[first.id].updatedAt || 0))[0];
+        const lastExamId = localStorage.getItem(LAST_EXAM_STORAGE_KEY);
+        const initialExamId = examDatabase.some(exam => exam.id === lastExamId) ? lastExamId : resumableExam?.id || examDatabase[0]?.id;
+        if (initialExamId) loadExam(initialExamId);
+    }
+
+    function persistCurrentAttempt() {
+        if (!currentExamId) return;
+        const existing = attemptRecords[currentExamId] || {};
+        currentAttempt = {
+            ...existing,
+            status: existing.status === "completed" ? "completed" : "in-progress",
+            studentName: document.getElementById('student_name').value,
+            studentEmail: document.getElementById('student_email').value,
+            answers: currentAnswers,
+            updatedAt: Date.now()
+        };
+        attemptRecords[currentExamId] = currentAttempt;
+        localStorage.setItem(ATTEMPT_STORAGE_KEY, JSON.stringify(attemptRecords));
+        localStorage.setItem(LAST_EXAM_STORAGE_KEY, currentExamId);
+    }
+
+    function saveAnswer(questionId, value) {
+        currentAnswers[questionId] = value;
+        persistCurrentAttempt();
+    }
+
+    function escapeAttribute(value) {
+        return String(value ?? '').replace(/[&"<>]/g, character => ({
+            '&': '&amp;', '"': '&quot;', '<': '&lt;', '>': '&gt;'
+        })[character]);
     }
 
     function loadExam(examId) {
         const exam = examDatabase.find(e => e.id === examId);
         if (!exam) return;
 
+        if (currentExamId && currentExamId !== examId) persistCurrentAttempt();
+        currentExamId = examId;
+        document.getElementById('exam-picker').value = examId;
+        currentAttempt = attemptRecords[examId] || {};
+        currentAnswers = { ...(currentAttempt.answers || {}) };
         currentExamData = exam.data;
         totalQuestions = 0;
         
         document.getElementById('display-exam-title').innerText = exam.title;
+        document.getElementById('student_name').value = currentAttempt.studentName || '';
+        document.getElementById('student_email').value = currentAttempt.studentEmail || '';
         const container = document.getElementById('questions-container');
         container.innerHTML = '';
         document.getElementById('result-container').style.display = 'none';
         
         const btn = document.getElementById('submit-btn');
+        const isCompleted = currentAttempt.status === "completed";
         btn.style.display = 'block';
-        btn.disabled = false;
-        btn.innerText = "Nộp bài & Chấm điểm 🐚";
+        btn.disabled = isCompleted;
+        btn.innerText = isCompleted ? "Đã nộp bài - kết quả đã lưu" : "Nộp bài & Chấm điểm 🐚";
 
         currentExamData.forEach((q) => {
             if (q.type === "title") {
@@ -1035,7 +1122,7 @@
                     optionsHtml += `
                         <li>
                             <label class="custom-radio-label">
-                                <input type="radio" name="q_${q.id}" value="${key}">
+                                <input type="radio" name="q_${q.id}" value="${key}" ${currentAnswers[q.id] === key ? 'checked' : ''} onchange="saveAnswer(${q.id}, this.value)">
                                 <span class="radio-mark"></span>
                                 <span class="option-text"><strong>${key}.</strong> ${value}</span>
                             </label>
@@ -1045,16 +1132,16 @@
             } 
             else if (q.type === "fill") {
                 totalQuestions++;
-                inputHtml = `<input type="text" class="premium-input" id="input_${q.id}" placeholder="Nhập đáp án của cậu vào đây...">`;
+                inputHtml = `<input type="text" class="premium-input" id="input_${q.id}" value="${escapeAttribute(currentAnswers[q.id])}" placeholder="Nhập đáp án của cậu vào đây..." oninput="saveAnswer(${q.id}, this.value)">`;
             }
             else if (q.type === "dropdown") {
                 totalQuestions++;
-                let opts = '<option value="" disabled selected>-- Chọn đáp án --</option>';
-                q.options.forEach(opt => { opts += `<option value="${opt}">${opt}</option>`; });
-                inputHtml = `<select class="premium-select" id="input_${q.id}">${opts}</select>`;
+                let opts = `<option value="" disabled ${currentAnswers[q.id] ? '' : 'selected'}>-- Chọn đáp án --</option>`;
+                q.options.forEach(opt => { opts += `<option value="${opt}" ${currentAnswers[q.id] === opt ? 'selected' : ''}>${opt}</option>`; });
+                inputHtml = `<select class="premium-select" id="input_${q.id}" onchange="saveAnswer(${q.id}, this.value)">${opts}</select>`;
             }
             else if (q.type === "essay") {
-                inputHtml = `<textarea class="premium-textarea" id="input_${q.id}" placeholder="Viết bài luận của cậu tại đây nhé..."></textarea>`;
+                inputHtml = `<textarea class="premium-textarea" id="input_${q.id}" placeholder="Viết bài luận của cậu tại đây nhé..." oninput="saveAnswer(${q.id}, this.value)"></textarea>`;
             }
 
             let expHtml = q.explanation ? `<div class="explanation" id="exp-${q.id}"><strong>🐚 Giải thích:</strong><br>${q.explanation}</div>` : '';
@@ -1065,12 +1152,55 @@
                 ${expHtml}
             `;
             container.appendChild(qDiv);
+            if (q.type === "essay") document.getElementById(`input_${q.id}`).value = currentAnswers[q.id] || '';
         });
         
         document.querySelector('.main-content').scrollTo(0, 0);
+        persistCurrentAttempt();
+        if (isCompleted) restoreSubmittedReview();
+    }
+
+    function restoreSubmittedReview() {
+        currentExamData.forEach(q => {
+            if (!['mcq', 'fill', 'dropdown'].includes(q.type)) return;
+            const block = document.getElementById(`question-block-${q.id}`);
+            const explanation = document.getElementById(`exp-${q.id}`);
+            if (!block) return;
+
+            const answer = String(currentAnswers[q.id] || '').trim().toLowerCase();
+            const isCorrect = answer !== '' && answer === String(q.correctAnswer).trim().toLowerCase();
+            block.style.borderColor = !answer ? '#fbbf24' : isCorrect ? '#34d399' : '#fb7185';
+            block.style.backgroundColor = !answer ? 'rgba(254, 243, 199, 0.7)' : isCorrect ? 'rgba(209, 250, 229, 0.7)' : 'rgba(254, 226, 226, 0.7)';
+            if (explanation) explanation.style.display = 'block';
+        });
+
+        document.querySelectorAll('#questions-container input, #questions-container select, #questions-container textarea').forEach(input => { input.disabled = true; });
+        document.getElementById('score-text').innerText = `${currentAttempt.score} / ${currentAttempt.totalQuestions}`;
+        document.getElementById('result-container').style.display = 'block';
+        updateDeliveryMessage(currentAttempt.deliveryStatus || 'saved');
+    }
+
+    function storeAttemptRecords() {
+        localStorage.setItem(ATTEMPT_STORAGE_KEY, JSON.stringify(attemptRecords));
+    }
+
+    function updateDeliveryMessage(status) {
+        const message = document.getElementById('result-message');
+        const btn = document.getElementById('submit-btn');
+        if (status === 'sent') {
+            message.innerText = 'Kết quả đã được gửi cho giáo viên và lưu trên trình duyệt này.';
+            btn.innerText = 'Đã nộp bài & gửi thành công';
+        } else if (status === 'error') {
+            message.innerText = 'Điểm và bài làm đã được lưu trên trình duyệt này, nhưng chưa gửi được qua mạng.';
+            btn.innerText = 'Đã lưu kết quả trên thiết bị';
+        } else {
+            message.innerText = 'Điểm số và bài làm được lưu trên trình duyệt này để cậu xem lại.';
+            btn.innerText = 'Đã nộp bài - kết quả đã lưu';
+        }
     }
 
     async function submitQuiz() {
+        if (currentAttempt.status === "completed") return;
         const studentName = document.getElementById('student_name').value.trim();
         const studentEmail = document.getElementById('student_email').value.trim();
         const examTitle = document.getElementById('display-exam-title').innerText;
@@ -1135,9 +1265,24 @@
             if (exp) exp.style.display = "block";
         });
 
+        // Save the score before attempting network delivery.
+        currentAttempt = {
+            ...currentAttempt,
+            status: "completed",
+            studentName,
+            studentEmail,
+            answers: currentAnswers,
+            score,
+            totalQuestions,
+            essayContent,
+            deliveryStatus: "pending",
+            updatedAt: Date.now()
+        };
+        attemptRecords[currentExamId] = currentAttempt;
+        storeAttemptRecords();
+
         // 2. HIỂN THỊ KẾT QUẢ NGAY LẬP TỨC
-        document.getElementById('score-text').innerText = `${score} / ${totalQuestions}`;
-        document.getElementById('result-container').style.display = 'block';
+        restoreSubmittedReview();
         document.getElementById('result-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
 
         // 3. GỬI DỮ LIỆU ĐẾN FORMSPREE
@@ -1163,20 +1308,28 @@
             });
 
             if (response.ok) {
-                btn.innerText = "Đã Nộp Bài & Gửi Thành Công! 🎉";
+                currentAttempt.deliveryStatus = 'sent';
+                storeAttemptRecords();
+                updateDeliveryMessage('sent');
             } else {
                 const resData = await response.json();
                 console.warn("Lỗi phản hồi từ Formspree:", resData);
-                alert("Lỗi Formspree: " + JSON.stringify(resData));
-                btn.innerText = "Đã Chấm Điểm Xong! (Lỗi Formspree) 🐚";
+                currentAttempt.deliveryStatus = 'error';
+                storeAttemptRecords();
+                updateDeliveryMessage('error');
             }
         } catch (error) {
             console.error("Lỗi kết nối:", error);
-            btn.innerText = "Đã Chấm Điểm Xong! (Lỗi mạng) 🐚";
+            currentAttempt.deliveryStatus = 'error';
+            storeAttemptRecords();
+            updateDeliveryMessage('error');
         }
 	}
 
-    initSidebar();
+    document.getElementById('student_name').addEventListener('input', persistCurrentAttempt);
+    document.getElementById('student_email').addEventListener('input', persistCurrentAttempt);
+    window.addEventListener('beforeunload', persistCurrentAttempt);
+    initExamPicker();
 </script>
 </body>
 </html>
